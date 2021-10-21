@@ -80,6 +80,13 @@ public class StatsCommand implements ICommand {
 				sender.addChatMessage((IChatComponent) new ChatComponentText(
 						EnumChatFormatting.DARK_GRAY + ("[QuickStats] set your API key as: " + args[1] + ".")));
 				break;
+			case "default":
+				if(args[1].equals("SKYWARS") || args[1].equals("BEDWARS") || args[1].equals("DUELS") ) {
+					ConfigHandler.writeConfig("default", args[1]);
+				} else {
+					sender.addChatMessage((IChatComponent) new ChatComponentText(
+							EnumChatFormatting.DARK_GRAY + "[QuickStats] Unsupported mode. Try: SKYWARS, BEDWARS, DUELS"));
+				}
 			case "testLoc":
 				sender.addChatMessage((IChatComponent) new ChatComponentText(
 						EnumChatFormatting.DARK_GRAY + "[QuickStats] Testing locraw function..."));
@@ -112,7 +119,7 @@ public class StatsCommand implements ICommand {
 			sender.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY
 					+ "[QuickStats] Command menu (mod version " + Reference.VERSION + ")"));
 			sender.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY
-					+ "[QuickStats] Comamnd usage: /quickstats <name>, /quickstats enabled/disabled, /quickstats reload"));
+					+ "[QuickStats] Command usage: /quickstats <name>, /quickstats enabled/disabled, /quickstats reload, /quickstats api <api key>"));
 		}
 	}
 

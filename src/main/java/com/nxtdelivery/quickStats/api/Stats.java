@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 
 import com.google.gson.JsonObject;
+import com.nxtdelivery.quickStats.util.ConfigHandler;
 
 public class Stats {
 	/**
@@ -24,8 +25,10 @@ public class Stats {
 			try {
 				game = game.substring(1, game.length() - 1); // fix for too many speech marks
 				// System.out.println(game);
-			} catch (Exception e) { // testing when in dev env
-				game = "DUELS";
+			} catch (Exception e) {
+				//e.printStackTrace();
+				game = "DUELS"; // testing when in dev env
+				game = ConfigHandler.defaultGame;
 			}
 			switch (game) {
 			case "SKYWARS":

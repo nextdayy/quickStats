@@ -39,6 +39,7 @@ public class LocrawUtil {
 	 */
 	public String getGameType(ClientChatReceivedEvent event) {
 		if (event.message.getUnformattedText().contains("{")) {
+			System.out.println("locraw util found msg");
 			event.setCanceled(true);
 			try {
 				JsonObject jsonObject = new JsonParser().parse(event.message.getUnformattedText()).getAsJsonObject();

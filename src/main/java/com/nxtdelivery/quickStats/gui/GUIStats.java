@@ -90,15 +90,13 @@ public class GUIStats extends Gui {
 		switch (guiScale) { // TODO at the moment, these scales are hard coded. In later versions this will
 							// be customizable.
 		case 0: // AUTO scale
-			middle = width - 60;
-			top = 40;
-			bottom = 95;
-			halfWidth = 52;
+			middle = width - 67;
+			top = 28;
+			bottom = 72;
+			halfWidth = 62;
 			seed = 105;
-			fontScale = 0.8f;
-			pad = middle + 350; // text padding
-			mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY
-					+ "[QuickStats] Note that the GUI is cursed on AUTO Scale. Use small, normal, or large."));
+			fontScale = 0.75f;
+			pad = middle + 373; // text padding
 			break;
 		case 1: // SMALL
 			middle = width - 130;
@@ -169,12 +167,14 @@ public class GUIStats extends Gui {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}*/
-			fr.drawString(title, middle - fr.getStringWidth(title) / 2, 58, -1);
+			
 			if (guiScale != 0) {
+				fr.drawString(title, middle - fr.getStringWidth(title) / 2, 58, -1);
 				GL11.glPushMatrix();
 				GL11.glScalef(fontScale, fontScale, fontScale); // shrink font
 			}
 			if (guiScale == 0) {
+				fr.drawString(title, 551 - fr.getStringWidth(title) / 2, 43, -1);
 				GL11.glScalef(fontScale, fontScale, fontScale);
 			}
 			String resultMsg;

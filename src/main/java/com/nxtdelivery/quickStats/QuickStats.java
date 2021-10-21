@@ -1,6 +1,7 @@
-/* Changelog v1.1
- *  - added colors, youtuber and staff support
- *  - added lots more games, including duels, bedwars, and skywars modes
+/* Changelog v1.2
+ *  - fix error where config wouldnt write properly
+ *  - add system to change default game
+ *  - fix GUI on AUTO mode
  *  - bug fixes
  *  - code cleanup
  */
@@ -100,10 +101,11 @@ public class QuickStats {
 			if (event.message.getUnformattedText().contains("Your new API key is")) {
 				String apiMessage = event.message.getUnformattedText();
 				String apiKey = apiMessage.substring(20, apiMessage.length());
+				//System.out.println(apiKey);
 				LOGGER.info("got API key from message: " + apiKey + ". writing and reloading config...");
 				ConfigHandler.writeConfig("apiKey", apiKey);
 				new TickDelay(() -> mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(
-						EnumChatFormatting.DARK_GRAY + "Grabbed and set your API key. The mod is now ready to use!")),
+						EnumChatFormatting.DARK_GRAY + "[QuickStats] Grabbed and set your API key. The mod is now ready to use!")),
 						5);
 				mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
 			}

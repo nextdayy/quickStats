@@ -18,7 +18,8 @@ public class ConfigHandler {
 	public static boolean firstStart = false;
 	public static boolean fileCorrupt = false;
 	public static String apiKey;
-	public static int key;
+	public static String defaultGame;
+	public static Integer key;
 
 	public static void ConfigLoad() {
 		if (configMain.exists() == true) {
@@ -35,20 +36,29 @@ public class ConfigHandler {
 				if (modEnabled == false) {
 					QuickStats.LOGGER.warn("State read from config is DISABLED. Keybinds wont work.");
 				}
-				apiKey = prop.getProperty("apiKey");
-				QuickStats.LOGGER.debug("got api key from config: " + apiKey);
-
+				//System.out.println(prop.getProperty("key"));
 				key = Integer.parseInt(prop.getProperty("key"));
 				QuickStats.LOGGER.debug("Key read from config is " + key);
+				
+				apiKey = prop.getProperty("apiKey");
+				QuickStats.LOGGER.debug("got api key from config: " + apiKey);
+				
+				defaultGame = prop.getProperty("default");
+				QuickStats.LOGGER.debug("got default game from config: " + defaultGame);
+				
 				reader.close();
 				QuickStats.LOGGER.info("Config read complete");
+				if(key == null || apiKey == null || defaultGame == null) {
+					throw new NullPointerException();
+				}
 			} catch (FileNotFoundException e) {
 				createConfig();
 			} catch (IOException e) {
 				QuickStats.LOGGER.error(e);
 			} catch (Exception e) {
+				e.printStackTrace();
+				QuickStats.LOGGER.error(e + "need to make new config file!");
 				createConfig();
-				QuickStats.LOGGER.error(e);
 				fileCorrupt = true;
 			}
 
@@ -70,8 +80,9 @@ public class ConfigHandler {
 			FileWriter writer = new FileWriter(configMain);
 			Properties prop = new Properties();
 			prop.setProperty("enabled", "true");
-			prop.setProperty("apiKey", "none");
 			prop.setProperty("key", "34");
+			prop.setProperty("apiKey", "none");
+			prop.setProperty("default", "BEDWARS");
 			prop.store(writer, "QuickStats configuration");
 			writer.close();
 			QuickStats.LOGGER.info("Config file created");
@@ -89,14 +100,25 @@ public class ConfigHandler {
 			if (type == "enabled") {
 				prop.setProperty(type, data);
 				prop.setProperty("apiKey", apiKey);
+				prop.setProperty("key", key.toString());
+				prop.setProperty("default", defaultGame);
 			}
 			if (type == "apiKey") {
 				prop.setProperty("enabled", Boolean.toString(modEnabled));
 				prop.setProperty(type, data);
+				prop.setProperty("key", key.toString());
+				prop.setProperty("default", defaultGame);
 			}
 			if (type == "key") {
 				prop.setProperty("enabled", Boolean.toString(modEnabled));
 				prop.setProperty("apiKey", apiKey);
+				prop.setProperty(type, data);
+				prop.setProperty("default", defaultGame);
+			}
+			if (type == "default") {
+				prop.setProperty("enabled", Boolean.toString(modEnabled));
+				prop.setProperty("apiKey", apiKey);
+				prop.setProperty("key", key.toString());
 				prop.setProperty(type, data);
 			}
 			prop.store(writer, "QuickStats configuration");
@@ -107,6 +129,7 @@ public class ConfigHandler {
 			QuickStats.LOGGER.error(e);
 		} catch (Exception e) {
 			QuickStats.LOGGER.error(e);
+			e.printStackTrace();
 		}
 	}
 }
