@@ -26,11 +26,20 @@ public class ApiRequest extends Thread {
 	public JsonObject rootStats, achievementStats;
 	public String formattedName;
 	public ArrayList result;
+	public static double exp;
 	public boolean noUser = false;
 	public boolean generalError = false;
+	public boolean noAPI = false;
 
+	/**
+	 * Create a new instance of the API request function, with a username.
+	 * 
+	 * @param uname
+	 */
 	public ApiRequest(String uname) {
 		username = uname;
+		this.setName("QuickStats API");
+		this.start();
 	}
 
 	public void run() {
@@ -78,6 +87,7 @@ public class ApiRequest extends Thread {
 				QuickStats.LOGGER.info("successfully proccessed from Hypxiel");
 				JsonObject js2 = js1.get("player").getAsJsonObject();
 				try { // get rank and name
+					exp = js2.get("networkExp").getAsDouble();
 					playerName = js2.get("displayname").getAsString();
 					rank = js2.get("newPackageRank").getAsString();
 					if (rank.equals("MVP_PLUS")) {
@@ -90,6 +100,10 @@ public class ApiRequest extends Thread {
 							rank = "MVP_PLUS";
 							rankColor = "PINK";
 							// e.printStackTrace();
+						}
+						try { // youtuber
+							rank = js2.get("rank").getAsString();
+						} catch (Exception e) {
 						}
 					}
 				} catch (NullPointerException e) {
@@ -111,6 +125,7 @@ public class ApiRequest extends Thread {
 			} else {
 				mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY
 						+ "[QuickStats] The Hypixel API didn't process the request properly. Try again."));
+				generalError = true;
 				QuickStats.LOGGER.error("error occoured when building after API request, closing");
 				js1 = null;
 			}
@@ -119,11 +134,13 @@ public class ApiRequest extends Thread {
 			if (ConfigHandler.apiKey.equals("none")) {
 				mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY
 						+ "[QuickStats] You haven't set an API key yet! Type /api new to get one, and the mod should grab it."));
+				noAPI = true;
 			} else {
 				mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY
 						+ "[QuickStats] failed to contact Hypixel API. This is usually due to an invalid API key."));
 				mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY
 						+ "[QuickStats] On Hypixel, type /api new to get a new key and the mod should automatically grab it."));
+				generalError = true;
 			}
 			return;
 		} catch (Exception e) {
@@ -136,7 +153,7 @@ public class ApiRequest extends Thread {
 		}
 	}
 
-	private String getFormattedName(String name, String rank, String color) { // TODO add more colors.
+	private String getFormattedName(String name, String rank, String color) {
 		QuickStats.LOGGER.debug(color);
 		String formattedName;
 		boolean getColor = false;
@@ -161,11 +178,18 @@ public class ApiRequest extends Thread {
 			plusA = 2;
 			formattedName = "\u00A76[MVP";
 			break;
+		case "YOUTUBER":
+			formattedName = "\u00A7c[\u00A7fYOUTUBE\u00A7c] " + name;
+			break;
+		case "ADMIN":
+			formattedName = "\u00A7c[ADMIN] " + name;
+			break;
 		default:
 			formattedName = "\u00A77" + name;
 			break;
 		}
 		if (getColor) {
+			// System.out.println(color);
 			switch (color) {
 			case "DARK_RED":
 				formattedName += "\u00A74+";
@@ -181,6 +205,33 @@ public class ApiRequest extends Thread {
 				break;
 			case "BLUE":
 				formattedName += "\u00A79+";
+				break;
+			case "DARK_GRAY":
+				formattedName += "\u00A77+";
+				break;
+			case "GOLD":
+				formattedName += "\u00A76+";
+				break;
+			case "GREEN":
+				formattedName += "\u00A7a+";
+				break;
+			case "YELLOW":
+				formattedName += "\u00A7e+";
+				break;
+			case "WHITE":
+				formattedName += "\u00A7f+";
+				break;
+			case "DARK_PURPLE":
+				formattedName += "\u00A75+";
+				break;
+			case "DARK_BLUE":
+				formattedName += "\u00A71+";
+				break;
+			case "DARK_AQUA":
+				formattedName += "\u00A73+";
+				break;
+			case "LIGHT_PURPLE":
+				formattedName += "\u00A7d+";
 				break;
 			default:
 				formattedName += "+";

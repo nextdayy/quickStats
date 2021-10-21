@@ -31,18 +31,12 @@ public class GetEntity {
 			if (mc.theWorld != null) {
 				mc.mcProfiler.startSection("pick");
 				mc.pointedEntity = null;
-				// double d0 = (double)mc.playerController.getBlockReachDistance();
-				double d0 = (double) 100F; // this should be far enough
+				double d0 = (double) 200F; // this should be far enough
 				mc.objectMouseOver = entity.rayTrace(d0, partialTicks);
 				double d1 = d0;
 				Vec3 vec3 = entity.getPositionEyes(partialTicks);
 				boolean flag = false;
 				int i = 3;
-
-				/*
-				 * if (mc.playerController.extendedReach()) { d0 = 6.0D; d1 = 6.0D; } else { if
-				 * (d0 > 3.0D) { flag = true; } }
-				 */
 
 				if (mc.objectMouseOver != null) {
 					d1 = mc.objectMouseOver.hitVec.distanceTo(vec3);

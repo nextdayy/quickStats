@@ -6,7 +6,6 @@ import org.lwjgl.opengl.GL11;
 
 import com.nxtdelivery.quickStats.QuickStats;
 import com.nxtdelivery.quickStats.api.ApiRequest;
-import com.nxtdelivery.quickStats.util.TickDelay;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -20,7 +19,7 @@ import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
-public class GUIStats extends Gui { // TODO fix lag, possibly use extends Thread?
+public class GUIStats extends Gui {
 	private static Minecraft mc = Minecraft.getMinecraft();
 	private final FontRenderer fr = mc.fontRendererObj;
 	long systemTime = Minecraft.getSystemTime();
@@ -37,7 +36,7 @@ public class GUIStats extends Gui { // TODO fix lag, possibly use extends Thread
 		width = resolution.getScaledWidth();
 		guiScale = mc.gameSettings.guiScale;
 		frames = 5 * 60;
-		framesLeft = 5 * 60;
+		framesLeft = 7 * 60; // first number = delay before progress bar (def: 5)
 		fifth = frames / 5;
 		upperThreshold = frames - fifth;
 		lowerThreshold = fifth;
@@ -55,7 +54,6 @@ public class GUIStats extends Gui { // TODO fix lag, possibly use extends Thread
 	public void run() {
 		MinecraftForge.EVENT_BUS.register(this);
 		api = new ApiRequest(username);
-		api.start();
 		mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
 	}
 
@@ -73,7 +71,7 @@ public class GUIStats extends Gui { // TODO fix lag, possibly use extends Thread
 
 	@SubscribeEvent
 	/**
-	 * Some of this code was taken from PopupEvents by Sk1er club under GNU License.
+	 * Some of this code was taken from PopupEvents by Sk1er Club under GNU License.
 	 * This math logic is used to render the window smoothly. All thanks to them,
 	 * this window can render nice and smoothly!
 	 */
@@ -139,7 +137,7 @@ public class GUIStats extends Gui { // TODO fix lag, possibly use extends Thread
 			long current = framesLeft - lowerThreshold;
 			float progress = 1F - clamp((float) current / (float) length);
 			Gui.drawRect(middle - currentWidth, bottom - 2, (int) (middle - currentWidth + (seed * progress)), bottom,
-					new Color(32, 50, 117, 200).getRGB()); // 128, 226, 126
+					new Color(22, 33, 245, 150).getRGB()); // 128, 226, 126
 			if (guiScale == 0) {
 				GL11.glPushMatrix();
 				GL11.glScalef(fontScale, fontScale, fontScale); // shrink font
@@ -155,6 +153,22 @@ public class GUIStats extends Gui { // TODO fix lag, possibly use extends Thread
 			if (api.generalError) {
 				title = "An error occoured!";
 			}
+			if (api.noAPI) {
+				title = "No valid API key!";
+			}
+			/*try {	//TODO image?
+			File fl = new File(Loader.instance().getConfigDir().getParent() + "//pack.png");
+			InputStream targetStream = new FileInputStream(fl);
+			BufferedImage bob = ImageIO.read(targetStream);
+			DynamicTexture b = new DynamicTexture(bob);
+			ResourceLocation s = mc.getTextureManager().getDynamicTextureLocation("hello", b);
+			mc.getRenderManager().renderEngine.bindTexture(s);
+			mc.getTextureManager().bindTexture(s);
+			
+			this.drawTexturedModalRect(30, 30, 0,32, 32,32);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}*/
 			fr.drawString(title, middle - fr.getStringWidth(title) / 2, 58, -1);
 			if (guiScale != 0) {
 				GL11.glPushMatrix();

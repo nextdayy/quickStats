@@ -31,6 +31,12 @@ public class LocrawUtil {
 	}
 
 	@SubscribeEvent
+	/**
+	 * Get the current game type using /locraw.
+	 * 
+	 * @param event
+	 * @return current game
+	 */
 	public String getGameType(ClientChatReceivedEvent event) {
 		if (event.message.getUnformattedText().contains("{")) {
 			event.setCanceled(true);

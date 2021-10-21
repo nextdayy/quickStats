@@ -1,3 +1,10 @@
+/* Changelog v1.1
+ *  - added colors, youtuber and staff support
+ *  - added lots more games, including duels, bedwars, and skywars modes
+ *  - bug fixes
+ *  - code cleanup
+ */
+
 package com.nxtdelivery.quickStats;
 
 import org.apache.logging.log4j.LogManager;
@@ -95,8 +102,9 @@ public class QuickStats {
 				String apiKey = apiMessage.substring(20, apiMessage.length());
 				LOGGER.info("got API key from message: " + apiKey + ". writing and reloading config...");
 				ConfigHandler.writeConfig("apiKey", apiKey);
-				mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(
-						EnumChatFormatting.DARK_GRAY + "Grabbed and set your API key. The mod is now ready to use!"));
+				new TickDelay(() -> mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(
+						EnumChatFormatting.DARK_GRAY + "Grabbed and set your API key. The mod is now ready to use!")),
+						5);
 				mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
 			}
 		} catch (Exception e) {
