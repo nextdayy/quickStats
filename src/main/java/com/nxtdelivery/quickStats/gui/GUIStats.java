@@ -6,6 +6,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.nxtdelivery.quickStats.QuickStats;
 import com.nxtdelivery.quickStats.api.ApiRequest;
+import com.nxtdelivery.quickStats.util.LocrawUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -53,6 +54,11 @@ public class GUIStats extends Gui {
 	@EventHandler()
 	public void run() {
 		MinecraftForge.EVENT_BUS.register(this);
+		if(QuickStats.locraw) {		// TODO next gen locraw?
+			QuickStats.locraw = false;
+			LocrawUtil locrawUtil = new LocrawUtil();
+			locrawUtil.regist();
+		}
 		api = new ApiRequest(username);
 		mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
 	}

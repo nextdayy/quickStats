@@ -16,7 +16,7 @@ public class Stats {
 	 * @param game
 	 * @return ArrayList game-specific stats
 	 */
-	public static ArrayList getStats(JsonObject playerStats, JsonObject acStats, String game) {
+	public static ArrayList getStats(JsonObject playerStats, JsonObject acStats, String game) {			// TODO comma separation of numbers?
 		ArrayList returnStats = new ArrayList();
 		float Fkd, Fwl;
 		BigDecimal kd, wl;
@@ -50,9 +50,9 @@ public class Stats {
 					JsonObject bwStats = playerStats.get("Bedwars").getAsJsonObject();
 					returnStats.add("Level: \u00A79" + acStats.get("bedwars_level").getAsString() + "✫"
 							+ "\u00A7f       Game: \u00A72BedWars");
-					returnStats.add("Total Wins: \u00A75" + acStats.get("bedwars_wins").getAsString()
+					returnStats.add("Wins: \u00A75" + acStats.get("bedwars_wins").getAsString()
 							+ "\u00A7f      Coins: \u00A76" + bwStats.get("coins").getAsString());
-					returnStats.add("Total Kills: " + bwStats.get("kills_bedwars").getAsString() + "     Total Deaths: "
+					returnStats.add("Kills: " + bwStats.get("kills_bedwars").getAsString() + "     Deaths: "
 							+ bwStats.get("deaths_bedwars").getAsString());
 					returnStats.add("Final Kills: " + bwStats.get("final_kills_bedwars").getAsString()
 							+ "     Final Deaths: " + bwStats.get("final_deaths_bedwars").getAsString());

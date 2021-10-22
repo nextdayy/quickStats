@@ -1,7 +1,5 @@
-/* Changelog v1.2
- *  - fix error where config wouldnt write properly
- *  - add system to change default game
- *  - fix GUI on AUTO mode
+/* Changelog v1.2.1
+ *  - change how locraw util works to fix spam and make it more compatible
  *  - bug fixes
  *  - code cleanup
  */
@@ -54,6 +52,7 @@ public class QuickStats {
 	public static final Logger LOGGER = LogManager.getLogger("QuickStats");
 	public static boolean updateCheck;
 	public static boolean betaFlag = false;
+	public static boolean locraw = false;
 
 	public boolean registerBus(EventBus bus, LoadController controller) { // register mod to the bus
 		bus.register(this);
@@ -119,8 +118,9 @@ public class QuickStats {
 	public void onWorldLoad(WorldEvent.Load event) {
 		try {
 			if (mc.getCurrentServerData().serverIP.equals("mc.hypixel.net")) {
-				LocrawUtil locrawUtil = new LocrawUtil();
-				new TickDelay(() -> locrawUtil.regist(), 20);
+				/*LocrawUtil locrawUtil = new LocrawUtil();
+				new TickDelay(() -> locrawUtil.regist(), 20);*/
+				locraw = true;
 			}
 		} catch (Exception e) {
 			// e.printStackTrace();
