@@ -1,5 +1,6 @@
-/* Changelog v1.2.1
- *  - change how locraw util works to fix spam and make it more compatible
+/* Changelog v1.4
+ *  - complete rewrite of configuration utility
+ *  - support for window customisation
  *  - bug fixes
  *  - code cleanup
  */
@@ -39,8 +40,11 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 
 import com.nxtdelivery.quickStats.command.StatsCommand;
+import com.nxtdelivery.quickStats.gui.GUIConfig;
 import com.nxtdelivery.quickStats.gui.GUIStats;
 import com.nxtdelivery.quickStats.util.*;
+
+import gg.essential.vigilance.Vigilance;
 
 @Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION)
 public class QuickStats {
@@ -53,6 +57,7 @@ public class QuickStats {
 	public static boolean updateCheck;
 	public static boolean betaFlag = false;
 	public static boolean locraw = false;
+	public static boolean corrupt = false;
 
 	public boolean registerBus(EventBus bus, LoadController controller) { // register mod to the bus
 		bus.register(this);
@@ -61,11 +66,14 @@ public class QuickStats {
 
 	@EventHandler()
 	public void init(FMLInitializationEvent event) {
+		try {
+			Vigilance.initialize();
+	        GUIConfig.INSTANCE.preload();
+		} catch (Exception e) {e.printStackTrace(); corrupt = true;}
 		LOGGER.info("attempting to check update status...");
 		updateCheck = UpdateChecker.updateNeeded(Reference.VERSION);
 		LOGGER.info("registering settings...");
-		ConfigHandler.ConfigLoad();
-		statsKey = new KeyBinding("Get Stats", ConfigHandler.key, "QuickStats");
+		statsKey = new KeyBinding("Get Stats", GUIConfig.key, "QuickStats");
 		FMLCommonHandler.instance().bus().register(this);
 		ClientRegistry.registerKeyBinding(statsKey);
 		MinecraftForge.EVENT_BUS.register(this);
@@ -75,12 +83,14 @@ public class QuickStats {
 
 	@SubscribeEvent
 	public void onKeyPress(InputEvent.KeyInputEvent event) {
-		if (Keyboard.getEventKey() == statsKey.getKeyCode() && ConfigHandler.modEnabled == true) {
-			if (ConfigHandler.key != statsKey.getKeyCode()) {
-				LOGGER.warn("Key code from config (" + ConfigHandler.key + ") differs to key code just used! ("
-						+ statsKey.getKeyCode() + ") writing new to config file...");
-				ConfigHandler.writeConfig("key", Integer.toString(statsKey.getKeyCode()));
-			}
+		if (Keyboard.getEventKey() == statsKey.getKeyCode() && GUIConfig.modEnabled == true) {
+			if(GUIConfig.key != statsKey.getKeyCode() ) {				// will write new key code if the player changed it in settings
+	    		LOGGER.warn("Key code from config (" + GUIConfig.key + ") differs to key code just used! (" + statsKey.getKeyCode() + ") writing new to config file...");
+	    		Integer key = (Integer) Keyboard.getEventKey();
+	    		GUIConfig.key = key;
+	    		GUIConfig.INSTANCE.markDirty();
+	    		GUIConfig.INSTANCE.writeData();
+	    	}
 			if (Keyboard.getEventKeyState()) {
 				try {
 					Entity entity = GetEntity.get(0);
@@ -96,36 +106,37 @@ public class QuickStats {
 	@SubscribeEvent
 	public void onChatRecieve(ClientChatReceivedEvent event) {
 		// System.out.println(event.message.getUnformattedText());
-		try {
-			if (event.message.getUnformattedText().contains("Your new API key is")) {
-				String apiMessage = event.message.getUnformattedText();
-				String apiKey = apiMessage.substring(20, apiMessage.length());
-				//System.out.println(apiKey);
-				LOGGER.info("got API key from message: " + apiKey + ". writing and reloading config...");
-				ConfigHandler.writeConfig("apiKey", apiKey);
-				new TickDelay(() -> mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(
-						EnumChatFormatting.DARK_GRAY + "[QuickStats] Grabbed and set your API key. The mod is now ready to use!")),
-						5);
-				mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
+		if(GUIConfig.autoGetAPI) {
+			try {
+				if (event.message.getUnformattedText().contains("Your new API key is")) {
+					String apiMessage = event.message.getUnformattedText();
+					String apiKey = apiMessage.substring(20, apiMessage.length());
+					//System.out.println(apiKey);
+					LOGGER.info("got API key from message: " + apiKey + ". writing and reloading config...");
+					GUIConfig.apiKey = apiKey;
+					GUIConfig.INSTANCE.markDirty();
+		    		GUIConfig.INSTANCE.writeData();
+					new TickDelay(() -> mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(
+							EnumChatFormatting.DARK_GRAY + "[QuickStats] Grabbed and set your API key. The mod is now ready to use!")),
+							5);
+					mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
-
 	}
 
 	@SubscribeEvent
 	public void onWorldLoad(WorldEvent.Load event) {
 		try {
-			if (mc.getCurrentServerData().serverIP.equals("mc.hypixel.net")) {
-				/*LocrawUtil locrawUtil = new LocrawUtil();
-				new TickDelay(() -> locrawUtil.regist(), 20);*/
+			if (mc.getCurrentServerData().serverIP.contains("hypixel")) {
 				locraw = true;
 			}
 		} catch (Exception e) {
 			// e.printStackTrace();
 		}
-		if (updateCheck == true) {
+		if (updateCheck == true && GUIConfig.sendUp) {
 			new TickDelay(() -> sendUpdateMessage(), 20);
 			updateCheck = false;
 		}
@@ -143,21 +154,17 @@ public class QuickStats {
 		}
 	}
 
-	private Runnable sendMessages(String message1, String message2, String message3) {
-		try {
-			mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
-			mc.thePlayer
-					.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY + message1));
-			mc.thePlayer
-					.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY + message2));
-			mc.thePlayer
-					.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY + message3));
-		} catch (NullPointerException e) {
-			LOGGER.fatal(e);
-			LOGGER.error("skipping new message, bad world return!");
-		}
-		return null;
-	}
+	private void sendMessages(String... messages) {
+        try {
+            mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
+            for (String message : messages) {
+                mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY + message));
+            }
+        } catch (NullPointerException e) {
+            LOGGER.fatal(e);
+            LOGGER.error("skipping new message, bad world return!");
+        }
+    }
 
 	private Runnable sendUpdateMessage() {
 		try {

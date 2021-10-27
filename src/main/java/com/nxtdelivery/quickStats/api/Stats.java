@@ -5,7 +5,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 
 import com.google.gson.JsonObject;
-import com.nxtdelivery.quickStats.util.ConfigHandler;
+import com.nxtdelivery.quickStats.gui.GUIConfig;
 
 public class Stats {
 	/**
@@ -27,8 +27,22 @@ public class Stats {
 				// System.out.println(game);
 			} catch (Exception e) {
 				//e.printStackTrace();
-				game = "DUELS"; // testing when in dev env
-				game = ConfigHandler.defaultGame;
+				//game = "DUELS"; // testing when in dev env
+				System.out.println(GUIConfig.defaultGame);
+				switch(GUIConfig.defaultGame) {
+				case 0:
+					game = "BEDWARS";
+					break;
+				case 1:
+					game = "SKYWARS";
+					break;
+				case 2:
+					game = "DUELS";
+					break;
+				default:		// just in case!
+					game = "teams_insane";
+					break;
+				}
 			}
 			switch (game) {
 			case "SKYWARS":

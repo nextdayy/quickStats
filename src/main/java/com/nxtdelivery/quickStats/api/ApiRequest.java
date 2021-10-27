@@ -12,7 +12,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.nxtdelivery.quickStats.QuickStats;
-import com.nxtdelivery.quickStats.util.ConfigHandler;
+import com.nxtdelivery.quickStats.gui.GUIConfig;
 import com.nxtdelivery.quickStats.util.LocrawUtil;
 
 import net.minecraft.client.Minecraft;
@@ -67,7 +67,7 @@ public class ApiRequest extends Thread {
 
 		/* process request from Hypixel */
 		try {
-			String url = "https://api.hypixel.net/player?key=" + ConfigHandler.apiKey + "&uuid=" + uuid;
+			String url = "https://api.hypixel.net/player?key=" + GUIConfig.apiKey + "&uuid=" + uuid;
 			// System.out.println(url);
 			InputStream input = new URL(url).openStream();
 			BufferedReader streamReader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
@@ -131,7 +131,7 @@ public class ApiRequest extends Thread {
 			}
 
 		} catch (IOException e) {
-			if (ConfigHandler.apiKey.equals("none")) {
+			if (GUIConfig.apiKey.equals("none")) {
 				mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY
 						+ "[QuickStats] You haven't set an API key yet! Type /api new to get one, and the mod should grab it."));
 				noAPI = true;

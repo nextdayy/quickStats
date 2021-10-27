@@ -25,24 +25,61 @@ public class GUIStats extends Gui {
 	private final FontRenderer fr = mc.fontRendererObj;
 	long systemTime = Minecraft.getSystemTime();
 	ScaledResolution resolution = new ScaledResolution(mc);
-	Integer frametime, height, width, guiScale, top, bottom, middle, halfWidth, seed, pad;
+	Integer frametime, height, width, top, bottom, middle, halfWidth, seed, pad;
 	Boolean beginTimer, retract;
 	long frames, framesLeft, fifth, upperThreshold, lowerThreshold;
 	Float fontScale, percentComplete;
 	String username, title;
 	ApiRequest api;
+	public static Integer guiScale;
 
 	public GUIStats(String user) {
 		height = resolution.getScaledHeight();
 		width = resolution.getScaledWidth();
 		guiScale = mc.gameSettings.guiScale;
 		frames = 5 * 60;
-		framesLeft = 7 * 60; // first number = delay before progress bar (def: 5)
+		framesLeft = 7 * 60; // first number = delay before progress bar (def: 7)
 		fifth = frames / 5;
 		upperThreshold = frames - fifth;
 		lowerThreshold = fifth;
 		percentComplete = 0.0f;
 		username = user;
+		if(!GUIConfig.sizeEnabled) {
+			switch (guiScale) {
+			case 0: // AUTO scale
+				middle = width - 67;
+				top = 28;
+				bottom = 72;
+				halfWidth = 62;
+				fontScale = 0.75f;
+				pad = middle + 373; // text padding
+				break;
+			case 1: // SMALL
+				middle = width - 130;
+				top = 50;
+				bottom = 145;
+				halfWidth = 112;
+				fontScale = 0.8f;
+				pad = middle + 314; // text padding
+				break;
+			case 2: // NORMAL
+				middle = width - 90; // position of window, smaller number = closer to edge
+				top = 50; // top of window
+				bottom = 115; // bottom of window
+				halfWidth = 82; // width of window, larger number is larger window
+				fontScale = 0.8f; // font size
+				pad = middle + 119; // text padding
+				break;
+			case 3: // LARGE
+				middle = width - 90;
+				top = 50;
+				bottom = 115;
+				halfWidth = 85;
+				fontScale = 0.8f;
+				pad = middle + 35; // text padding
+				break;
+			}
+		}
 		this.run();
 	}
 
@@ -54,13 +91,15 @@ public class GUIStats extends Gui {
 	@EventHandler()
 	public void run() {
 		MinecraftForge.EVENT_BUS.register(this);
-		if(QuickStats.locraw) {		// TODO next gen locraw?
+		if(QuickStats.locraw) {		
 			QuickStats.locraw = false;
 			LocrawUtil locrawUtil = new LocrawUtil();
 			locrawUtil.regist();
 		}
 		api = new ApiRequest(username);
-		mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
+		if(GUIConfig.doSound) {
+			mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
+		}
 	}
 
 	private static float clamp(float number) {
@@ -92,56 +131,30 @@ public class GUIStats extends Gui {
 		}
 		percentComplete = clamp(easeOut(percentComplete,
 				framesLeft < lowerThreshold ? 0.0f : framesLeft > upperThreshold ? 1.0f : framesLeft));
-
-		switch (guiScale) { // TODO at the moment, these scales are hard coded. In later versions this will
-							// be customizable.
-		case 0: // AUTO scale
-			middle = width - 67;
-			top = 28;
-			bottom = 72;
-			halfWidth = 62;
-			seed = 105;
-			fontScale = 0.75f;
-			pad = middle + 373; // text padding
-			break;
-		case 1: // SMALL
-			middle = width - 130;
-			top = 50;
-			bottom = 145;
-			halfWidth = 112;
-			seed = 220;
+		
+		if(GUIConfig.sizeEnabled) {
+			middle = width - GUIConfig.winMiddle;
+			top = GUIConfig.winTop;
+			bottom = GUIConfig.winBottom;
+			halfWidth = GUIConfig.winWidth;
 			fontScale = 0.8f;
-			pad = middle + seed + 90; // text padding
-			break;
-		case 2: // NORMAL
-			middle = width - 90; // position of window, smaller number = closer to edge
-			top = 50; // top of window
-			bottom = 115; // bottom of window
-			halfWidth = 82; // width of window, larger number is larger window
-			seed = 160; // controls the progress bar, larger number longer it goes
-			fontScale = 0.8f; // font size
-			pad = middle + halfWidth + 37; // text padding
-			break;
-		case 3: // LARGE
-			middle = width - 90;
-			top = 50;
-			bottom = 115;
-			halfWidth = 85;
-			seed = 145;
-			fontScale = 0.8f;
-			pad = middle + 35; // text padding
-			break;
+			pad = middle + 119;
 		}
-
+		
+		seed = (halfWidth * 2);
+		
 		int currentWidth = (int) (halfWidth * percentComplete);
-		Gui.drawRect(middle - currentWidth, top, middle + currentWidth, bottom, new Color(27, 27, 27, 200).getRGB());
+		Gui.drawRect(middle - currentWidth, top, middle + currentWidth, bottom, GUIConfig.bgColor.getRGB());
 
 		if (percentComplete == 1.0F) {
+			if(GUIConfig.test == true) {
+				framesLeft = 100;
+			}
 			long length = upperThreshold - lowerThreshold;
 			long current = framesLeft - lowerThreshold;
 			float progress = 1F - clamp((float) current / (float) length);
 			Gui.drawRect(middle - currentWidth, bottom - 2, (int) (middle - currentWidth + (seed * progress)), bottom,
-					new Color(22, 33, 245, 150).getRGB()); // 128, 226, 126
+					GUIConfig.progColor.getRGB()); // 128, 226, 126
 			if (guiScale == 0) {
 				GL11.glPushMatrix();
 				GL11.glScalef(fontScale, fontScale, fontScale); // shrink font

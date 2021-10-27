@@ -3,6 +3,7 @@ package com.nxtdelivery.quickStats.util;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.nxtdelivery.quickStats.QuickStats;
+import com.nxtdelivery.quickStats.gui.GUIConfig;
 
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
@@ -18,7 +19,11 @@ public class LocrawUtil {
 	public void regist() {
 		MinecraftForge.EVENT_BUS.register(this);
 		try {
-			mc.thePlayer.sendChatMessage("/locraw");
+			if(GUIConfig.autoGame) {
+				mc.thePlayer.sendChatMessage("/locraw");
+			} else {
+				gameType = "";
+			}
 		} catch (Exception e) {
 			QuickStats.LOGGER
 					.error("couldn't sent locraw message. this usually occours when being kicked from the server.");
