@@ -68,7 +68,7 @@ public class ApiRequest extends Thread {
 		/* process request from Hypixel */
 		try {
 			String url = "https://api.hypixel.net/player?key=" + GUIConfig.apiKey + "&uuid=" + uuid;
-			// System.out.println(url);
+			if(GUIConfig.debugMode) { QuickStats.LOGGER.info(url); }
 			InputStream input = new URL(url).openStream();
 			BufferedReader streamReader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
 			StringBuilder responseStrBuilder = new StringBuilder();
@@ -99,7 +99,7 @@ public class ApiRequest extends Thread {
 						} catch (Exception e) {
 							rank = "MVP_PLUS";
 							rankColor = "PINK";
-							// e.printStackTrace();
+							// if(GUIConfig.debugMode) {e.printStackTrace();}
 						}
 						try { // youtuber
 							rank = js2.get("rank").getAsString();
@@ -110,18 +110,10 @@ public class ApiRequest extends Thread {
 					rank = "non";
 				}
 				formattedName = getFormattedName(playerName, rank, rankColor);
-				// mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText("Stats for
-				// " + formattedName));
+
 				rootStats = js2.get("stats").getAsJsonObject();
 				achievementStats = js2.get("achievements").getAsJsonObject();
 				result = Stats.getStats(rootStats, achievementStats, LocrawUtil.gameType);
-				// JsonObject js4 = js3.get("SkyWars").getAsJsonObject(); // DEBUG: test
-				// System.out.println(js4.get("kills_solo_insane").getAsString());
-				for (int i = 0; i < result.size(); i++) {
-					// QuickStats.LOGGER.debug(result.get(i));
-					// mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(
-					// EnumChatFormatting.DARK_GRAY + result.get(i).toString()));
-				}
 			} else {
 				mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY
 						+ "[QuickStats] The Hypixel API didn't process the request properly. Try again."));
@@ -145,7 +137,7 @@ public class ApiRequest extends Thread {
 			return;
 		} catch (Exception e) {
 			// QuickStats.LOGGER.error(e.getStackTrace().toString());
-			e.printStackTrace();
+			if(GUIConfig.debugMode) {e.printStackTrace();}
 			mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY
 					+ "[QuickStats] an unexpected error occoured. Check logs for more info."));
 			generalError = true;

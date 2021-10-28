@@ -13,7 +13,6 @@ import gg.essential.vigilance.data.PropertyType;
 import net.minecraft.client.Minecraft;
 
 public class GUIConfig extends Vigilant {
-	
 	public static boolean test = false;
 	
 	@Property(
@@ -34,6 +33,12 @@ public class GUIConfig extends Vigilant {
 	        category = "General", subcategory = "General"
 	    )
 	    public static boolean doSound = true;
+	@Property(
+	        type = PropertyType.SWITCH, name = "Compatability",
+	        description = "Change how the automatic game utility works in an attempt to increase compatability.",
+	        category = "General", subcategory = "General"
+	    )
+	    public static boolean locrawComp = false;
 	@Property(
 	        type = PropertyType.SELECTOR, name = "Default Game",
 	        description = "Game to show stats for if nothing else is found.",
@@ -82,18 +87,18 @@ public class GUIConfig extends Vigilant {
 	        description = "Reset all values to their defaults.\n \u00A7cForcibly restarts your game!",
 	        category = "Support", subcategory = "General"
 	    ) 
-	public static void reset(){
-		try {
-			FileWriter writer = new FileWriter(new File("./config/quickStats.toml"));
-			writer.write("this was cleared so it will be reset on next restart.");
-			writer.close();
+		public static void reset() {
+			try {
+				FileWriter writer = new FileWriter(new File("./config/quickStats.toml"));
+				writer.write("this was cleared so it will be reset on next restart.");
+				writer.close();
 
-			QuickStats.LOGGER.warn("config file was cleared. Please restart your game.");
-		} catch (Exception e) {
-			QuickStats.LOGGER.error("failed to clear config, " + e);
+				QuickStats.LOGGER.warn("config file was cleared. Please restart your game.");
+			} catch (Exception e) {
+				QuickStats.LOGGER.error("failed to clear config, " + e);
+			}
+			throw new NullPointerException("Clearing config file");
 		}
-		throw new NullPointerException("Clearing config file");
-	}
 	
 	
 	
@@ -102,53 +107,57 @@ public class GUIConfig extends Vigilant {
 	
 	
 	@Property(
-	        type = PropertyType.BUTTON, name = "Open Window",
+	        type = PropertyType.BUTTON, name = "Load Window",
 	        description = "Toggle opening of the window so you can see what you are changing.\n\u00A7ePress the button again to close.",
 	        category = "Gui Settings"
 	    ) 
-	public static void testWin(){ 	
-		if(!test) { test = true; GUIStats guiTest = new GUIStats("nxtdaydelivery");}
-		else { test = false;}
-	}
+		public static void testWin() {
+			if (!test) {
+				test = true;
+				GUIStats guiTest = new GUIStats("nxtdaydelivery");
+			} else {
+				test = false;
+			}
+		}
 	@Property(
 	        type = PropertyType.BUTTON, name = "Reset Window",
-	        description = "Reset the window to the default values for your current GUI scale.\n You might need to reopen the GUI and\\or restart your game for it to update.",
+	        description = "Reset the window to the default values for your current GUI scale.\nYou might need to reopen the GUI and\\or restart your game for it to update.",
 	        category = "Gui Settings"
 	    ) 
-	public static void resetGUI() {
-		switch (mc.gameSettings.guiScale) {
-		case 0: // AUTO scale
-			winMiddle = 67;
-			winTop = 28;
-			winBottom = 72;
-			winWidth = 62;
-			break;
-		case 1: // SMALL
-			winMiddle = 130;
-			winTop = 50;
-			winBottom = 145;
-			winWidth = 112;
-			break;
-		case 2: // NORMAL
-			winMiddle = 90;
-			winTop = 50;
-			winBottom = 115;
-			winWidth = 82;
-			break;
-		case 3: // LARGE
-			winMiddle = 90;
-			winTop = 50;
-			winBottom = 115;
-			winWidth = 85;
-			break;
+		public static void resetGUI() {
+			switch (mc.gameSettings.guiScale) {
+			case 0: // AUTO scale
+				winMiddle = 67;
+				winTop = 28;
+				winBottom = 72;
+				winWidth = 62;
+				break;
+			case 1: // SMALL
+				winMiddle = 130;
+				winTop = 50;
+				winBottom = 145;
+				winWidth = 112;
+				break;
+			case 2: // NORMAL
+				winMiddle = 90;
+				winTop = 50;
+				winBottom = 115;
+				winWidth = 82;
+				break;
+			case 3: // LARGE
+				winMiddle = 90;
+				winTop = 50;
+				winBottom = 115;
+				winWidth = 85;
+				break;
+			}
+			bgColor = new Color(27, 27, 27, 200);
+			progColor = new Color(22, 33, 245, 140);
 		}
-		bgColor = new Color(27,27,27,200); 
-		progColor = new Color(22, 33, 245,140); 
-	}
-	
+
 	@Property(
 	        type = PropertyType.SWITCH, name = "Custom Window",
-	        description = "Enable/Disable changing of the window size and position.\n Please note this might be odd on AUTO gui scale, and currently is under development.",
+	        description = "Enable/Disable changing of the window size and position.\nPlease note this is currently is under development and may behave unexpectedly.",
 	        category = "Gui Settings", subcategory = "Size"
 	    )
 	    public static boolean sizeEnabled = false;
@@ -204,7 +213,7 @@ public class GUIConfig extends Vigilant {
 	
 	
 	@Property(
-	        type = PropertyType.NUMBER,
+			type = PropertyType.NUMBER,
 	        name = "Keybind",
 	        description = "Keybind of the mod.",
 	        category = "General",
@@ -214,13 +223,14 @@ public class GUIConfig extends Vigilant {
 	
 	public static GUIConfig INSTANCE = new GUIConfig();
 	private static Minecraft mc = Minecraft.getMinecraft();
+
 	public GUIConfig() {
 		super(new File("./config/quickStats.toml"), "QuickStats (" + Reference.VERSION + ")");
-        initialize();
-        
-        addDependency("winWidth","sizeEnabled");
-        addDependency("winTop","sizeEnabled");
-        addDependency("winBottom","sizeEnabled");
+		initialize();
+
+		addDependency("winWidth", "sizeEnabled");
+		addDependency("winTop", "sizeEnabled");
+		addDependency("winBottom", "sizeEnabled");
 		addDependency("winMiddle", "sizeEnabled");
 
 	}

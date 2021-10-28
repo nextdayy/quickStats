@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class LocrawUtil {
@@ -19,7 +20,7 @@ public class LocrawUtil {
 	public void regist() {
 		MinecraftForge.EVENT_BUS.register(this);
 		try {
-			if(GUIConfig.autoGame) {
+			if (GUIConfig.autoGame) {
 				mc.thePlayer.sendChatMessage("/locraw");
 			} else {
 				gameType = "";
@@ -35,17 +36,20 @@ public class LocrawUtil {
 		MinecraftForge.EVENT_BUS.unregister(this);
 	}
 
-	@SubscribeEvent
+	
 	/**
 	 * Get the current game type using /locraw.
 	 * 
 	 * @param event
 	 * @return current game
 	 */
+	@SubscribeEvent(priority=EventPriority.HIGHEST,receiveCanceled = true)
 	public String getGameType(ClientChatReceivedEvent event) {
 		if (event.message.getUnformattedText().contains("{")) {
-			//System.out.println("locraw util found msg");
-			event.setCanceled(true);
+			// System.out.println("locraw util found msg");
+			if (!GUIConfig.locrawComp) {
+				event.setCanceled(true);
+			}
 			try {
 				JsonObject jsonObject = new JsonParser().parse(event.message.getUnformattedText()).getAsJsonObject();
 				destroy();
@@ -63,7 +67,9 @@ public class LocrawUtil {
 				jsonObject = null;
 				return gameType;
 			} catch (Exception e) {
-				e.printStackTrace();
+				if (GUIConfig.debugMode) {
+					e.printStackTrace();
+				}
 				// gameType = "solo_insane";
 				return "solo_insane";
 			}

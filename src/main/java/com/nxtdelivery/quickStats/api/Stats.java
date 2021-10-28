@@ -26,7 +26,7 @@ public class Stats {
 				game = game.substring(1, game.length() - 1); // fix for too many speech marks
 				// System.out.println(game);
 			} catch (Exception e) {
-				//e.printStackTrace();
+				//if(GUIConfig.debugMode) {e.printStackTrace();}
 				//game = "DUELS"; // testing when in dev env
 				System.out.println(GUIConfig.defaultGame);
 				switch(GUIConfig.defaultGame) {
@@ -128,6 +128,30 @@ public class Stats {
 				returnStats = genericDuel("SkyWars 1v1", "sw_duel", acStats, playerStats);
 				break;
 
+			case "teams":	// quakecraft
+			case "solo":		
+				try {
+					JsonObject qkStats = playerStats.get("Quake").getAsJsonObject();
+					double lvl = getLevel(ApiRequest.exp);
+					Integer lvlInt = (int) Math.round(lvl);
+					String winstreak;
+					returnStats.add("Level: \u00A74" + lvlInt + "\u00A7f       Mode: \u00A75 Quakecraft");
+					returnStats.add("Godlikes: \u00A75" + acStats.get("quake_godlikes").getAsString() + "\u00A7f     Coins: \u00A76"
+							+ qkStats.get("coins").getAsString());
+					returnStats.add("Kills: " + qkStats.get("kills").getAsString() + "     Deaths: "
+							+ qkStats.get("deaths").getAsString());
+					returnStats.add("Wins: " + qkStats.get("wins").getAsString() + "     Headshots: "
+							+ qkStats.get("headshots").getAsString());
+					kdString = ratioCalc(qkStats.get("kills").getAsFloat(),
+							qkStats.get("deaths").getAsFloat(), "kd");
+					wlString = ratioCalc(qkStats.get("wins").getAsFloat(),
+							qkStats.get("deaths").getAsFloat(), "wins");
+					returnStats.add("K/D: " + kdString + "      Win/Loss: " + wlString);
+				} catch (Exception e) {
+					returnStats.add("no more stats could be found!");
+				}
+				break;
+				
 			default:
 				returnStats.add("you aren't in a supported game!");
 				returnStats.add("lots more games coming soon!");
@@ -135,7 +159,7 @@ public class Stats {
 			}
 			return returnStats;
 		} catch (Exception e) {
-			e.printStackTrace();
+			if(GUIConfig.debugMode) {e.printStackTrace();}
 			returnStats.add("No stats for this user were found!");
 			return returnStats;
 		}
@@ -288,7 +312,7 @@ public class Stats {
 			result.add("K/D: " + kdString + "        Melee H/M: " + wlString);
 		} catch (Exception e) {
 			result.add("no more stats could be found!");
-			e.printStackTrace();
+			if(GUIConfig.debugMode) {e.printStackTrace();}
 			return result;
 		}
 		return result;

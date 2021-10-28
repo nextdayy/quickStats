@@ -1,10 +1,17 @@
 package com.nxtdelivery.quickStats.gui;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+
+import javax.imageio.ImageIO;
 
 import org.lwjgl.opengl.GL11;
 
 import com.nxtdelivery.quickStats.QuickStats;
+import com.nxtdelivery.quickStats.Reference;
 import com.nxtdelivery.quickStats.api.ApiRequest;
 import com.nxtdelivery.quickStats.util.LocrawUtil;
 
@@ -12,10 +19,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -32,8 +43,15 @@ public class GUIStats extends Gui {
 	String username, title;
 	ApiRequest api;
 	public static Integer guiScale;
-
+	ResourceLocation location;
+	
 	public GUIStats(String user) {
+		/*
+		try {
+			DynamicTexture dynamic = new DynamicTexture(ImageIO.read(new File(Loader.instance().getConfigDir().getParent() + "//steve.png")));
+			location = mc.getTextureManager().getDynamicTextureLocation("quickstats/user", dynamic);
+			
+		} catch (Exception e) {if(GUIConfig.debugMode) {e.printStackTrace();}}*/
 		height = resolution.getScaledHeight();
 		width = resolution.getScaledWidth();
 		guiScale = mc.gameSettings.guiScale;
@@ -173,18 +191,16 @@ public class GUIStats extends Gui {
 			if (api.noAPI) {
 				title = "No valid API key!";
 			}
-			/*try {	//TODO image?
-			File fl = new File(Loader.instance().getConfigDir().getParent() + "//pack.png");
-			InputStream targetStream = new FileInputStream(fl);
-			BufferedImage bob = ImageIO.read(targetStream);
-			DynamicTexture b = new DynamicTexture(bob);
-			ResourceLocation s = mc.getTextureManager().getDynamicTextureLocation("hello", b);
-			mc.getRenderManager().renderEngine.bindTexture(s);
-			mc.getTextureManager().bindTexture(s);
 			
-			this.drawTexturedModalRect(30, 30, 0,32, 32,32);
+			/*try {	//TODO image?
+			//mc.renderEngine.bindTexture(location);
+			//mc.getTextureManager().bindTexture(new ResourceLocation(Reference.MODID, "quickstats/user"));
+			mc.getTextureManager().bindTexture(location);
+			GlStateManager.color(0F,0F,0F,0.75f);
+			GlStateManager.disableDepth();
+			this.drawTexturedModalRect(100.2f,100.2f,0,0,32,32);
 		} catch(Exception e) {
-			e.printStackTrace();
+			if(GUIConfig.debugMode) {e.printStackTrace();}
 		}*/
 			
 			if (guiScale != 0) {
@@ -204,7 +220,7 @@ public class GUIStats extends Gui {
 					fr.drawString(resultMsg, pad, (10 * i) + 90, -1);
 				}
 			} catch (Exception e) {
-				// e.printStackTrace();
+				//if(GUIConfig.debugMode) {e.printStackTrace();}
 			}
 			GL11.glPopMatrix();
 		}

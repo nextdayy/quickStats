@@ -1,6 +1,8 @@
-/* Changelog v1.4
- *  - complete rewrite of configuration utility
- *  - support for window customisation
+/* Changelog v1.4.1
+ *  - support for quake
+ *  - fixes to locraw utility
+ *  - add buildscripts
+ *  - fixes to essential
  *  - bug fixes
  *  - code cleanup
  */
@@ -66,10 +68,16 @@ public class QuickStats {
 
 	@EventHandler()
 	public void init(FMLInitializationEvent event) {
+		LOGGER.info("reading config...");
 		try {
 			Vigilance.initialize();
 	        GUIConfig.INSTANCE.preload();
-		} catch (Exception e) {e.printStackTrace(); corrupt = true;}
+	        LOGGER.info("config read was successful");
+		} catch (Exception e) {
+			if(GUIConfig.debugMode) {e.printStackTrace();}
+			corrupt = true;
+			LOGGER.error("Config failed to read. File has been reset. If you just reset your config, ignore this message.");
+		}
 		LOGGER.info("attempting to check update status...");
 		updateCheck = UpdateChecker.updateNeeded(Reference.VERSION);
 		LOGGER.info("registering settings...");
@@ -86,8 +94,7 @@ public class QuickStats {
 		if (Keyboard.getEventKey() == statsKey.getKeyCode() && GUIConfig.modEnabled == true) {
 			if(GUIConfig.key != statsKey.getKeyCode() ) {				// will write new key code if the player changed it in settings
 	    		LOGGER.warn("Key code from config (" + GUIConfig.key + ") differs to key code just used! (" + statsKey.getKeyCode() + ") writing new to config file...");
-	    		Integer key = (Integer) Keyboard.getEventKey();
-	    		GUIConfig.key = key;
+	    		GUIConfig.key = Keyboard.getEventKey();;
 	    		GUIConfig.INSTANCE.markDirty();
 	    		GUIConfig.INSTANCE.writeData();
 	    	}
@@ -122,7 +129,7 @@ public class QuickStats {
 					mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				if(GUIConfig.debugMode) {e.printStackTrace();}
 			}
 		}
 	}
@@ -134,7 +141,7 @@ public class QuickStats {
 				locraw = true;
 			}
 		} catch (Exception e) {
-			// e.printStackTrace();
+			// if(GUIConfig.debugMode) {e.printStackTrace();}
 		}
 		if (updateCheck == true && GUIConfig.sendUp) {
 			new TickDelay(() -> sendUpdateMessage(), 20);
@@ -152,6 +159,12 @@ public class QuickStats {
 				LOGGER.error("skipping beta message, bad world return!");
 			}
 		}
+		if (corrupt) {
+			new TickDelay(() -> sendMessages("",
+					"[QuickStats] An error occoured while trying to read your config file. You will have to reset it.",
+					"[QuickStats] If you just reset your configuration file, ignore this message."), 20);
+			corrupt = false;
+		}
 	}
 
 	private void sendMessages(String... messages) {
@@ -161,7 +174,7 @@ public class QuickStats {
                 mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY + message));
             }
         } catch (NullPointerException e) {
-            LOGGER.fatal(e);
+            if(GUIConfig.debugMode) {e.printStackTrace();}
             LOGGER.error("skipping new message, bad world return!");
         }
     }

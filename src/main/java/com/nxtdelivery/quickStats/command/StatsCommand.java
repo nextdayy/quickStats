@@ -61,7 +61,7 @@ public class StatsCommand implements ICommand {
 				try {
 					new TickDelay(() -> mc.displayGuiScreen((GuiScreen)GUIConfig.INSTANCE.gui()),1);
 				} catch(Exception e) {
-					e.printStackTrace();
+					if(GUIConfig.debugMode) {e.printStackTrace();}
 				}
 				break;
 			case "reload":
