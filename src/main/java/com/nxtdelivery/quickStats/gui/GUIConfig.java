@@ -34,8 +34,8 @@ public class GUIConfig extends Vigilant {
 	    )
 	    public static boolean doSound = true;
 	@Property(
-	        type = PropertyType.SWITCH, name = "Compatability",
-	        description = "Change how the automatic game utility works in an attempt to increase compatability.",
+	        type = PropertyType.SWITCH, name = "Compatibility",
+	        description = "Change how the automatic game utility works in an attempt to increase compatibility.",
 	        category = "General", subcategory = "General"
 	    )
 	    public static boolean locrawComp = false;
@@ -50,7 +50,7 @@ public class GUIConfig extends Vigilant {
 	@Property(
 	        type = PropertyType.TEXT,
 	        name = "API Key",
-	        description = "The API key used in the mod. Can be also automatically set by typing in /api new ingame.",
+	        description = "The API key used in the mod. Can be also automatically set by typing in /api new in-game.",
 	        category = "General",
 	        protectedText = true, subcategory = "API"
 	    )
@@ -68,7 +68,7 @@ public class GUIConfig extends Vigilant {
 	@Property(
 			type = PropertyType.SWITCH,
 			name = "Send Update Messages",
-			description = "Send update messages on startup if a new version is availible.", 
+			description = "Send update messages on startup if a new version is available.",
 			category = "General", subcategory = "Updates"
 	)
 		    public static boolean sendUp = true;
@@ -89,7 +89,7 @@ public class GUIConfig extends Vigilant {
 	    ) 
 		public static void reset() {
 			try {
-				FileWriter writer = new FileWriter(new File("./config/quickStats.toml"));
+				FileWriter writer = new FileWriter("./config/quickStats.toml");
 				writer.write("this was cleared so it will be reset on next restart.");
 				writer.close();
 
@@ -114,7 +114,7 @@ public class GUIConfig extends Vigilant {
 		public static void testWin() {
 			if (!test) {
 				test = true;
-				GUIStats guiTest = new GUIStats("nxtdaydelivery");
+				new GUIStats("nxtdaydelivery");
 			} else {
 				test = false;
 			}
@@ -173,7 +173,7 @@ public class GUIConfig extends Vigilant {
 	        type = PropertyType.SLIDER, name = "Window Top",
 	        description = "Change the position of the top of the window.",
 	        category = "Gui Settings", subcategory = "Size",
-	        min = 0, max = 200
+	        min = 5, max = 200
 	    )
 	    public static int winTop = 50;
 	@Property(
@@ -209,6 +209,12 @@ public class GUIConfig extends Vigilant {
 	        min = 1, max = 255
 	    )
 	    public static Color progColor = new Color(22, 33, 245,100); 
+	@Property(
+	        type = PropertyType.SWITCH, name = "Text Shadow",
+	        description = "Render the text with a shadow on the GUI.",
+	        category = "Gui Settings", subcategory = "Text"
+	    )
+	    public static boolean textShadow = false; 
 	
 	
 	

@@ -1,10 +1,8 @@
-/* Changelog v1.4.1
- *  - support for quake
- *  - fixes to locraw utility
- *  - add buildscripts
- *  - fixes to essential
- *  - bug fixes
- *  - code cleanup
+/* Changelog v1.4.2
+ *  add text shadow support
+ *  change version utility system
+ *  bug fixes
+ *  code cleanup
  */
 
 package com.nxtdelivery.quickStats;
@@ -14,7 +12,6 @@ import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -25,19 +22,14 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatStyle;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
-import net.minecraft.util.MovingObjectPosition;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.LoadController;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.eventhandler.EventBus;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 
@@ -53,7 +45,7 @@ public class QuickStats {
 
 	@Mod.Instance("qSts") // variables and things
 	public static QuickStats instance;
-	private static Minecraft mc = Minecraft.getMinecraft();
+	private static final Minecraft mc = Minecraft.getMinecraft();
 	private KeyBinding statsKey;
 	public static final Logger LOGGER = LogManager.getLogger("QuickStats");
 	public static boolean updateCheck;
@@ -61,10 +53,6 @@ public class QuickStats {
 	public static boolean locraw = false;
 	public static boolean corrupt = false;
 
-	public boolean registerBus(EventBus bus, LoadController controller) { // register mod to the bus
-		bus.register(this);
-		return true;
-	}
 
 	@EventHandler()
 	public void init(FMLInitializationEvent event) {
@@ -82,19 +70,19 @@ public class QuickStats {
 		updateCheck = UpdateChecker.updateNeeded(Reference.VERSION);
 		LOGGER.info("registering settings...");
 		statsKey = new KeyBinding("Get Stats", GUIConfig.key, "QuickStats");
-		FMLCommonHandler.instance().bus().register(this);
 		ClientRegistry.registerKeyBinding(statsKey);
 		MinecraftForge.EVENT_BUS.register(this);
 		ClientCommandHandler.instance.registerCommand(new StatsCommand());
+		LOGGER.debug(instance.toString());		// please stop moaning at me intellij
 		LOGGER.info("Complete! QuickStats loaded successfully.");
 	}
 
 	@SubscribeEvent
 	public void onKeyPress(InputEvent.KeyInputEvent event) {
-		if (Keyboard.getEventKey() == statsKey.getKeyCode() && GUIConfig.modEnabled == true) {
+		if (Keyboard.getEventKey() == statsKey.getKeyCode() && GUIConfig.modEnabled) {
 			if(GUIConfig.key != statsKey.getKeyCode() ) {				// will write new key code if the player changed it in settings
 	    		LOGGER.warn("Key code from config (" + GUIConfig.key + ") differs to key code just used! (" + statsKey.getKeyCode() + ") writing new to config file...");
-	    		GUIConfig.key = Keyboard.getEventKey();;
+	    		GUIConfig.key = Keyboard.getEventKey();
 	    		GUIConfig.INSTANCE.markDirty();
 	    		GUIConfig.INSTANCE.writeData();
 	    	}
@@ -102,28 +90,27 @@ public class QuickStats {
 				try {
 					Entity entity = GetEntity.get(0);
 					if (entity instanceof EntityPlayer) {
-						GUIStats gui = new GUIStats(entity.getName());
+						new GUIStats(entity.getName());
 					}
-				} catch (Exception e) {
-				}
+				} catch (Exception ignored) {}
 			}
 		}
 	}
 
 	@SubscribeEvent
-	public void onChatRecieve(ClientChatReceivedEvent event) {
+	public void onChatReceive(ClientChatReceivedEvent event) {
 		// System.out.println(event.message.getUnformattedText());
 		if(GUIConfig.autoGetAPI) {
 			try {
 				if (event.message.getUnformattedText().contains("Your new API key is")) {
 					String apiMessage = event.message.getUnformattedText();
-					String apiKey = apiMessage.substring(20, apiMessage.length());
+					String apiKey = apiMessage.substring(20);
 					//System.out.println(apiKey);
 					LOGGER.info("got API key from message: " + apiKey + ". writing and reloading config...");
 					GUIConfig.apiKey = apiKey;
 					GUIConfig.INSTANCE.markDirty();
 		    		GUIConfig.INSTANCE.writeData();
-					new TickDelay(() -> mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(
+					new TickDelay(() -> mc.thePlayer.addChatMessage(new ChatComponentText(
 							EnumChatFormatting.DARK_GRAY + "[QuickStats] Grabbed and set your API key. The mod is now ready to use!")),
 							5);
 					mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
@@ -143,11 +130,11 @@ public class QuickStats {
 		} catch (Exception e) {
 			// if(GUIConfig.debugMode) {e.printStackTrace();}
 		}
-		if (updateCheck == true && GUIConfig.sendUp) {
-			new TickDelay(() -> sendUpdateMessage(), 20);
+		if (updateCheck && GUIConfig.sendUp) {
+			new TickDelay(this::sendUpdateMessage, 20);
 			updateCheck = false;
 		}
-		if (Reference.VERSION.contains("beta") && betaFlag == true) {
+		if (Reference.VERSION.contains("beta") && betaFlag) {
 			try {
 				new TickDelay(() -> sendMessages("",
 						"[QuickStats] Beta build has been detected (ver. " + Reference.VERSION + ")",
@@ -161,7 +148,7 @@ public class QuickStats {
 		}
 		if (corrupt) {
 			new TickDelay(() -> sendMessages("",
-					"[QuickStats] An error occoured while trying to read your config file. You will have to reset it.",
+					"[QuickStats] An error occurred while trying to read your config file. You will have to reset it.",
 					"[QuickStats] If you just reset your configuration file, ignore this message."), 20);
 			corrupt = false;
 		}
@@ -171,7 +158,7 @@ public class QuickStats {
         try {
             mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
             for (String message : messages) {
-                mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY + message));
+                mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY + message));
             }
         } catch (NullPointerException e) {
             if(GUIConfig.debugMode) {e.printStackTrace();}
@@ -179,28 +166,27 @@ public class QuickStats {
         }
     }
 
-	private Runnable sendUpdateMessage() {
+	private void sendUpdateMessage() {
 		try {
 			IChatComponent comp = new ChatComponentText("Click here to update it!");
 			ChatStyle style = new ChatStyle().setChatClickEvent(new ClickEvent(Action.OPEN_URL, Reference.URL));
 			style.setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-					(IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY + Reference.URL)));
+					new ChatComponentText(EnumChatFormatting.DARK_GRAY + Reference.URL)));
 			style.setColor(EnumChatFormatting.DARK_GRAY);
 			style.setUnderlined(true);
 			comp.setChatStyle(style);
 			mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
-			mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(
+			mc.thePlayer.addChatMessage(new ChatComponentText(
 					EnumChatFormatting.DARK_GRAY + "--------------------------------------"));
-			mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY
+			mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
 					+ ("A newer version of QuickStats is available! (" + UpdateChecker.latestVersion + ")")));
 			mc.thePlayer.addChatMessage(comp);
-			mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(
+			mc.thePlayer.addChatMessage(new ChatComponentText(
 					EnumChatFormatting.DARK_GRAY + "--------------------------------------"));
 		} catch (NullPointerException e) {
 			LOGGER.fatal(e);
 			LOGGER.error("skipping update message, bad world return!");
 		}
-		return null;
 	}
 
 }

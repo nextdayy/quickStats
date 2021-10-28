@@ -17,7 +17,7 @@ public class LocrawUtil {
 	public static String gameType;
 
 	@EventHandler()
-	public void regist() {
+	public void register() {
 		MinecraftForge.EVENT_BUS.register(this);
 		try {
 			if (GUIConfig.autoGame) {
@@ -27,7 +27,7 @@ public class LocrawUtil {
 			}
 		} catch (Exception e) {
 			QuickStats.LOGGER
-					.error("couldn't sent locraw message. this usually occours when being kicked from the server.");
+					.error("couldn't sent locraw message. this usually occurs when being kicked from the server.");
 		}
 	}
 
@@ -37,12 +37,7 @@ public class LocrawUtil {
 	}
 
 	
-	/**
-	 * Get the current game type using /locraw.
-	 * 
-	 * @param event
-	 * @return current game
-	 */
+
 	@SubscribeEvent(priority=EventPriority.HIGHEST,receiveCanceled = true)
 	public String getGameType(ClientChatReceivedEvent event) {
 		if (event.message.getUnformattedText().contains("{")) {

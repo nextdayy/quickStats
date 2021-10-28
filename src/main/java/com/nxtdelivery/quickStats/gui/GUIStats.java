@@ -1,17 +1,8 @@
 package com.nxtdelivery.quickStats.gui;
 
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-
-import javax.imageio.ImageIO;
-
 import org.lwjgl.opengl.GL11;
 
 import com.nxtdelivery.quickStats.QuickStats;
-import com.nxtdelivery.quickStats.Reference;
 import com.nxtdelivery.quickStats.api.ApiRequest;
 import com.nxtdelivery.quickStats.util.LocrawUtil;
 
@@ -19,14 +10,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -36,8 +21,7 @@ public class GUIStats extends Gui {
 	private final FontRenderer fr = mc.fontRendererObj;
 	long systemTime = Minecraft.getSystemTime();
 	ScaledResolution resolution = new ScaledResolution(mc);
-	Integer frametime, height, width, top, bottom, middle, halfWidth, seed, pad;
-	Boolean beginTimer, retract;
+	Integer height, width, top, bottom, middle, halfWidth, seed, pad;
 	long frames, framesLeft, fifth, upperThreshold, lowerThreshold;
 	Float fontScale, percentComplete;
 	String username, title;
@@ -112,7 +96,7 @@ public class GUIStats extends Gui {
 		if(QuickStats.locraw) {		
 			QuickStats.locraw = false;
 			LocrawUtil locrawUtil = new LocrawUtil();
-			locrawUtil.regist();
+			locrawUtil.register();
 		}
 		api = new ApiRequest(username);
 		if(GUIConfig.doSound) {
@@ -133,10 +117,10 @@ public class GUIStats extends Gui {
 	}
 
 	@SubscribeEvent
-	/**
-	 * Some of this code was taken from PopupEvents by Sk1er Club under GNU License.
-	 * This math logic is used to render the window smoothly. All thanks to them,
-	 * this window can render nice and smoothly!
+	/*
+	  Some of this code was taken from PopupEvents by Sk1er Club under GNU License.
+	  This math logic is used to render the window smoothly. All thanks to them,
+	  this window can render nice and smoothly!
 	 */
 	public void renderEvent(TickEvent.RenderTickEvent event) {
 		if (framesLeft <= 0) {
@@ -165,7 +149,7 @@ public class GUIStats extends Gui {
 		Gui.drawRect(middle - currentWidth, top, middle + currentWidth, bottom, GUIConfig.bgColor.getRGB());
 
 		if (percentComplete == 1.0F) {
-			if(GUIConfig.test == true) {
+			if(GUIConfig.test) {
 				framesLeft = 100;
 			}
 			long length = upperThreshold - lowerThreshold;
@@ -186,7 +170,7 @@ public class GUIStats extends Gui {
 				title = "User not found!";
 			}
 			if (api.generalError) {
-				title = "An error occoured!";
+				title = "An error occurred!";
 			}
 			if (api.noAPI) {
 				title = "No valid API key!";
@@ -204,12 +188,20 @@ public class GUIStats extends Gui {
 		}*/
 			
 			if (guiScale != 0) {
-				fr.drawString(title, middle - fr.getStringWidth(title) / 2, 58, -1);
+				if(GUIConfig.textShadow) {
+					fr.drawStringWithShadow(title, middle - fr.getStringWidth(title) / 2, 58, -1);
+				} else {
+					fr.drawString(title, middle - fr.getStringWidth(title) / 2, 58, -1);
+				}
 				GL11.glPushMatrix();
 				GL11.glScalef(fontScale, fontScale, fontScale); // shrink font
 			}
 			if (guiScale == 0) {
-				fr.drawString(title, 551 - fr.getStringWidth(title) / 2, 43, -1);
+				if(GUIConfig.textShadow) {
+					fr.drawStringWithShadow(title, 551 - fr.getStringWidth(title) / 2, 43, -1);
+				} else {
+					fr.drawString(title, 551 - fr.getStringWidth(title) / 2, 43, -1);
+				}
 				GL11.glScalef(fontScale, fontScale, fontScale);
 			}
 			String resultMsg;
@@ -217,7 +209,11 @@ public class GUIStats extends Gui {
 				for (int i = 0; i < api.result.size(); i++) {
 					QuickStats.LOGGER.debug(api.result.get(i));
 					resultMsg = api.result.get(i).toString();
-					fr.drawString(resultMsg, pad, (10 * i) + 90, -1);
+					if(GUIConfig.textShadow) {
+						fr.drawStringWithShadow(resultMsg, pad, (10 * i) + 90, -1);
+					} else {
+						fr.drawString(resultMsg, pad, (10 * i) + 90, -1);
+					}
 				}
 			} catch (Exception e) {
 				//if(GUIConfig.debugMode) {e.printStackTrace();}

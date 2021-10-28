@@ -5,12 +5,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import com.nxtdelivery.quickStats.QuickStats;
 import com.nxtdelivery.quickStats.gui.GUIConfig;
 import com.nxtdelivery.quickStats.util.LocrawUtil;
@@ -18,10 +17,9 @@ import com.nxtdelivery.quickStats.util.LocrawUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IChatComponent;
 
 public class ApiRequest extends Thread {
-	private static Minecraft mc = Minecraft.getMinecraft();
+	private static final Minecraft mc = Minecraft.getMinecraft();
 	String username, uuid, rank, rankColor, playerName;
 	public JsonObject rootStats, achievementStats;
 	public String formattedName;
@@ -33,8 +31,7 @@ public class ApiRequest extends Thread {
 
 	/**
 	 * Create a new instance of the API request function, with a username.
-	 * 
-	 * @param uname
+	 *
 	 */
 	public ApiRequest(String uname) {
 		username = uname;
@@ -46,7 +43,7 @@ public class ApiRequest extends Thread {
 		/* get UUID from Mojang */
 		try {
 			InputStream input = new URL("https://api.mojang.com/users/profiles/minecraft/" + username).openStream();
-			BufferedReader streamReader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
+			BufferedReader streamReader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
 			StringBuilder responseStrBuilder = new StringBuilder();
 			String inputStr;
 			while ((inputStr = streamReader.readLine()) != null)
@@ -55,14 +52,14 @@ public class ApiRequest extends Thread {
 			uuid = jsonObject.get("id").getAsString();
 			// System.out.println(uuid);
 		} catch (IllegalStateException e) {
-			mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(
+			mc.thePlayer.addChatMessage(new ChatComponentText(
 					EnumChatFormatting.DARK_GRAY + "[QuickStats] Player not found: " + username));
 			noUser = true;
 			return;
 		} catch (Exception e) {
-			QuickStats.LOGGER.error(e.getStackTrace().toString());
-			mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY
-					+ "[QuickStats] an unexpected error occoured. Check logs for more info."));
+			if(GUIConfig.debugMode) {e.printStackTrace();}
+			mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
+					+ "[QuickStats] an unexpected error occurred. Check logs for more info."));
 		}
 
 		/* process request from Hypixel */
@@ -70,7 +67,7 @@ public class ApiRequest extends Thread {
 			String url = "https://api.hypixel.net/player?key=" + GUIConfig.apiKey + "&uuid=" + uuid;
 			if(GUIConfig.debugMode) { QuickStats.LOGGER.info(url); }
 			InputStream input = new URL(url).openStream();
-			BufferedReader streamReader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
+			BufferedReader streamReader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
 			StringBuilder responseStrBuilder = new StringBuilder();
 			String inputStr;
 			while ((inputStr = streamReader.readLine()) != null)
@@ -82,9 +79,9 @@ public class ApiRequest extends Thread {
 			 * System.out.println(key); }
 			 */
 
-			Boolean success = (Boolean) js1.get("success").getAsBoolean();
+			boolean success = js1.get("success").getAsBoolean();
 			if (success) {
-				QuickStats.LOGGER.info("successfully proccessed from Hypxiel");
+				QuickStats.LOGGER.info("successfully processed from Hypixel");
 				JsonObject js2 = js1.get("player").getAsJsonObject();
 				try { // get rank and name
 					exp = js2.get("networkExp").getAsDouble();
@@ -103,45 +100,42 @@ public class ApiRequest extends Thread {
 						}
 						try { // youtuber
 							rank = js2.get("rank").getAsString();
-						} catch (Exception e) {
-						}
+						} catch (Exception ignored) {}
 					}
 				} catch (NullPointerException e) {
 					rank = "non";
 				}
 				formattedName = getFormattedName(playerName, rank, rankColor);
+				System.out.println(formattedName);
 
 				rootStats = js2.get("stats").getAsJsonObject();
 				achievementStats = js2.get("achievements").getAsJsonObject();
 				result = Stats.getStats(rootStats, achievementStats, LocrawUtil.gameType);
 			} else {
-				mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY
+				mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
 						+ "[QuickStats] The Hypixel API didn't process the request properly. Try again."));
 				generalError = true;
-				QuickStats.LOGGER.error("error occoured when building after API request, closing");
-				js1 = null;
+				QuickStats.LOGGER.error("error occurred when building after API request, closing");
 			}
 
 		} catch (IOException e) {
 			if (GUIConfig.apiKey.equals("none")) {
-				mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY
+				mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
 						+ "[QuickStats] You haven't set an API key yet! Type /api new to get one, and the mod should grab it."));
 				noAPI = true;
 			} else {
-				mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY
+				mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
 						+ "[QuickStats] failed to contact Hypixel API. This is usually due to an invalid API key."));
-				mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY
+				mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
 						+ "[QuickStats] On Hypixel, type /api new to get a new key and the mod should automatically grab it."));
 				generalError = true;
 			}
-			return;
 		} catch (Exception e) {
 			// QuickStats.LOGGER.error(e.getStackTrace().toString());
 			if(GUIConfig.debugMode) {e.printStackTrace();}
-			mc.thePlayer.addChatMessage((IChatComponent) new ChatComponentText(EnumChatFormatting.DARK_GRAY
-					+ "[QuickStats] an unexpected error occoured. Check logs for more info."));
+			mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
+					+ "[QuickStats] an unexpected error occurred. Check logs for more info."));
 			generalError = true;
-			return;
 		}
 	}
 
@@ -149,10 +143,10 @@ public class ApiRequest extends Thread {
 		QuickStats.LOGGER.debug(color);
 		String formattedName;
 		boolean getColor = false;
-		Integer plusA = 0;
+		int plusA = 0;
 		switch (rank) {
 		case "VIP":
-			formattedName = "\u00A7a[VIP] " + name; // § = \u00A7
+			formattedName = "\u00A7a[VIP] " + name;
 			break;
 		case "VIP_PLUS":
 			formattedName = "\u00A7a[VIP\u00A76+\u00A7a] " + name;

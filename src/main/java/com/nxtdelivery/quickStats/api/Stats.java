@@ -2,24 +2,16 @@ package com.nxtdelivery.quickStats.api;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import com.google.gson.JsonObject;
 import com.nxtdelivery.quickStats.gui.GUIConfig;
 
 public class Stats {
-	/**
-	 * Checks game, then return stats specific for that game.
-	 * 
-	 * @param playerStats
-	 * @param acStats
-	 * @param game
-	 * @return ArrayList game-specific stats
-	 */
 	public static ArrayList getStats(JsonObject playerStats, JsonObject acStats, String game) {			// TODO comma separation of numbers?
 		ArrayList returnStats = new ArrayList();
-		float Fkd, Fwl;
-		BigDecimal kd, wl;
 		String kdString, wlString;
 		try {
 			try {
@@ -133,8 +125,7 @@ public class Stats {
 				try {
 					JsonObject qkStats = playerStats.get("Quake").getAsJsonObject();
 					double lvl = getLevel(ApiRequest.exp);
-					Integer lvlInt = (int) Math.round(lvl);
-					String winstreak;
+					int lvlInt = (int) Math.round(lvl);
 					returnStats.add("Level: \u00A74" + lvlInt + "\u00A7f       Mode: \u00A75 Quakecraft");
 					returnStats.add("Godlikes: \u00A75" + acStats.get("quake_godlikes").getAsString() + "\u00A7f     Coins: \u00A76"
 							+ qkStats.get("coins").getAsString());
@@ -165,43 +156,28 @@ public class Stats {
 		}
 	}
 
-	/**
-	 * Calculates general ration, with String formatting.
-	 * 
-	 * @param stat1
-	 * @param stat2
-	 * @param type
-	 * @return formatted RATIO
-	 */
+
 	private static String ratioCalc(float stat1, float stat2, String type) {
 		float ratio = stat1 / stat2;
 		String result;
 		BigDecimal kd = new BigDecimal(ratio).setScale(2, RoundingMode.HALF_UP);
-		if (type == "wins") {
+		if (Objects.equals(type, "wins")) {
 			if (kd.floatValue() > 0.4f) {
-				result = "\u00A72" + kd.toString() + "\u00A7f";
+				result = "\u00A72" + kd + "\u00A7f";
 			} else {
-				result = "\u00A74" + kd.toString() + "\u00A7f";
+				result = "\u00A74" + kd + "\u00A7f";
 			}
 		} else {
 			if (kd.floatValue() > 1f) {
-				result = "\u00A72" + kd.toString() + "\u00A7f";
+				result = "\u00A72" + kd + "\u00A7f";
 			} else {
-				result = "\u00A74" + kd.toString() + "\u00A7f";
+				result = "\u00A74" + kd + "\u00A7f";
 			}
 		}
 		return result;
 	}
 
-	/**
-	 * Constructor for general bedwars gamemodes.
-	 * 
-	 * @param gamemodeFormatted
-	 * @param gamemode
-	 * @param acStats
-	 * @param playerStats
-	 * @return ArrayList stats
-	 */
+
 	private static ArrayList genericBW(String gamemodeFormatted, String gamemode, JsonObject acStats,
 			JsonObject playerStats) { // TODO do this for more games
 		ArrayList result = new ArrayList();
@@ -229,15 +205,7 @@ public class Stats {
 		}
 	}
 
-	/**
-	 * Constructor for general Skywars stats gamemodes.
-	 * 
-	 * @param gamemodeFormatted
-	 * @param gamemode
-	 * @param acStats
-	 * @param playerStats
-	 * @return ArrayList stats
-	 */
+
 	private static ArrayList genericSW(String gamemodeFormatted, String gamemode, JsonObject acStats,
 			JsonObject playerStats) {
 		ArrayList result = new ArrayList();
@@ -266,15 +234,7 @@ public class Stats {
 		}
 	}
 
-	/**
-	 * constructor for general duel stats.
-	 * 
-	 * @param gamemodeFormatted
-	 * @param gamemode
-	 * @param acStats
-	 * @param playerStats
-	 * @return ArrayList stats
-	 */
+
 	private static ArrayList genericDuel(String gamemodeFormatted, String gamemode, JsonObject acStats,
 			JsonObject playerStats) {
 		ArrayList result = new ArrayList();
@@ -321,13 +281,21 @@ public class Stats {
 	/**
 	 * Method to get network level of player. Taken from Hypixel API documentation.
 	 */
-	static double getLevel(double exp) {
+	private static double getLevel(double exp) {
 		double BASE = 10_000;
 		double GROWTH = 2_500;
-		double HALF_GROWTH = 0.5 * GROWTH;
 		double REVERSE_PQ_PREFIX = -(BASE - 0.5 * GROWTH) / GROWTH;
 		double REVERSE_CONST = REVERSE_PQ_PREFIX * REVERSE_PQ_PREFIX;
 		double GROWTH_DIVIDES_2 = 2 / GROWTH;
 		return exp < 0 ? 1 : Math.floor(1 + REVERSE_PQ_PREFIX + Math.sqrt(REVERSE_CONST + GROWTH_DIVIDES_2 * exp));
+	}
+	private static String formatInt(Integer num) {			// TODO implement this
+		try {
+			NumberFormat form = NumberFormat.getInstance();
+	        form.setGroupingUsed(true);
+	        return form.format(num);
+		} catch (Exception e) {
+			return num.toString();
+		}
 	}
 }

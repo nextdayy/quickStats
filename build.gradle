@@ -17,6 +17,9 @@ minecraft {
     runDir = "run"
     mappings = "stable_22"
     makeObfSourceJar = false
+    replace('@NAME@', mod_name)
+    replace('@VER@': mod_version)
+    replace('@ID@', mod_id)
     clientRunArgs += '--tweakClass gg.essential.loader.stage0.EssentialSetupTweaker'
 }
 
@@ -44,9 +47,6 @@ dependencies {
     // implementation "com.example:example:1.0.0"
     // If you would like to include it (have the library inside your jar) instead use
     // include "com.example:example:1.0.0"
-    //include 'com.github.wnameless:json-flattener-java7:0.4.1' 
-    //include 'org.apache.commons:commons-text:1.1'
-    //include 'org.apache.commons:commons-lang3:3.5'
     include ('gg.essential:loader-launchwrapper:1.1.1') {
         transitive = false
     }
@@ -57,20 +57,24 @@ dependencies {
  * This task simply replaces the `${version}` and `${mcversion}` properties in the mcmod.info with the data from Gradle
  */
 processResources {
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
+    inputs.property "name", mod_name
+    inputs.property "version", mod_version
+    inputs.property "id", mod_id
+    inputs.property "mcversion", minecraft.version
 
-    // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-                
-        // replace version and mcversion
-        expand 'version':project.version, 'mcversion':project.minecraft.version
+        include "mcmod.info"
+
+        expand(
+                "name": mod_name,
+                "version": mod_version,
+                "id": mod_id,
+                "mcversion": minecraft.version
+        )
     }
-        
-    // copy everything else, thats not the mcmod.info
+
     from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
+        exclude "mcmod.info"
     }
 }
 
@@ -80,7 +84,7 @@ processResources {
 task moveResources {
     doLast {
         ant.move file: "${buildDir}/resources/main",
-            todir: "${buildDir}/classes/java"
+                todir: "${buildDir}/classes/java"
     }
 }
 
@@ -107,9 +111,9 @@ shadowJar {
     duplicatesStrategy DuplicatesStrategy.EXCLUDE
 }
 
-reobf { shadowJar { mappingType = "SEARGE" } }
-tasks.reobfShadowJar.mustRunAfter shadowJar
-afterEvaluate {
-    build.dependsOn reobfShadowJar
-}
-
+//reobf { shadowJar { mappingType = "SEARGE" } }
+//tasks.reobfShadowJar.mustRunAfter shadowJar
+//afterEvaluate {
+//    build.dependsOn reobfShadowJar
+//}
+jar.dependsOn shadowJar

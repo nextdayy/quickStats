@@ -10,7 +10,7 @@ public class TickDelay {
 	Runnable funct;
 
 	public TickDelay(Runnable functionName, int ticks) {
-		regist();
+		register();
 		delay = ticks;
 		funct = functionName;
 	}
@@ -33,7 +33,7 @@ public class TickDelay {
 	}
 
 	@EventHandler()
-	private void regist() {
+	private void register() {
 		MinecraftForge.EVENT_BUS.register(this);
 	}
 
