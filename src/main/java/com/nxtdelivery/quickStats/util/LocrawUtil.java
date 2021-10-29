@@ -13,7 +13,7 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class LocrawUtil {
-	private static Minecraft mc = Minecraft.getMinecraft();
+	private static final Minecraft mc = Minecraft.getMinecraft();
 	public static String gameType;
 
 	@EventHandler()
@@ -59,7 +59,6 @@ public class LocrawUtil {
 					}
 				}
 				QuickStats.LOGGER.info(gameType);
-				jsonObject = null;
 				return gameType;
 			} catch (Exception e) {
 				if (GUIConfig.debugMode) {

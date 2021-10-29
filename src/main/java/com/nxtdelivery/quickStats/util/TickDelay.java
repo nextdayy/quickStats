@@ -7,12 +7,12 @@ import net.minecraftforge.common.MinecraftForge;
 
 public class TickDelay {
 	Integer delay;
-	Runnable funct;
+	Runnable function;
 
 	public TickDelay(Runnable functionName, int ticks) {
 		register();
 		delay = ticks;
-		funct = functionName;
+		function = functionName;
 	}
 
 	@SubscribeEvent
@@ -38,6 +38,6 @@ public class TickDelay {
 	}
 
 	private void run() {
-		funct.run();
+		function.run();
 	}
 }

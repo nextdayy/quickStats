@@ -4,9 +4,9 @@ plugins {
     id "net.minecraftforge.gradle.forge" version "6f53277"
 }
 
-version = "1.0"
+version = mod_version
 group = "com.nxtdelivery.quickStats"
-archivesBaseName = "quickStats"
+archivesBaseName = "[1.8.9] quickStats"
 
 sourceCompatibility = targetCompatibility = 1.8
 compileJava.options.encoding = "UTF-8"
