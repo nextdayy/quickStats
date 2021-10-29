@@ -14,21 +14,22 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
+import org.jetbrains.annotations.NotNull;
 
 public class StatsCommand implements ICommand {
 
-    private final List aliases;
+    private final List<String> aliases;
     private static final Minecraft mc = Minecraft.getMinecraft();
 
     public StatsCommand() {
-        aliases = new ArrayList();
+        aliases = new ArrayList<>();
         aliases.add("qsts");
         aliases.add("quickstats");
         aliases.add("qs");
     }
 
     @Override
-    public int compareTo(ICommand o) {
+    public int compareTo(@NotNull ICommand o) {
         return 0;
     }
 
@@ -43,7 +44,7 @@ public class StatsCommand implements ICommand {
     }
 
     @Override
-    public List getCommandAliases() {
+    public List<String> getCommandAliases() {
         return this.aliases;
     }
 

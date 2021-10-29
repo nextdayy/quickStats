@@ -10,8 +10,8 @@ import com.google.gson.JsonObject;
 import com.nxtdelivery.quickStats.gui.GUIConfig;
 
 public class Stats {
-    public static ArrayList getStats(JsonObject playerStats, JsonObject acStats, String game) {            // TODO comma separation of numbers?
-        ArrayList returnStats = new ArrayList();
+    public static ArrayList<String> getStats(JsonObject playerStats, JsonObject acStats, String game) {
+        ArrayList<String> returnStats = new ArrayList<>();
         String kdString, wlString;
         try {
             try {
@@ -19,7 +19,6 @@ public class Stats {
                 // System.out.println(game);
             } catch (Exception e) {
                 //if(GUIConfig.debugMode) {e.printStackTrace();}
-                //game = "DUELS"; // testing when in dev env
                 System.out.println(GUIConfig.defaultGame);
                 switch (GUIConfig.defaultGame) {
                     case 0:
@@ -50,7 +49,7 @@ public class Stats {
                         returnStats.add("Kills: " + formatInt(acStats.get("skywars_kills_solo").getAsInt() + acStats.get("skywars_kills_team").getAsInt()) + "     Deaths: "
                                 + formatInt(swStats.get("losses").getAsInt()));
                         returnStats.add("Wins: " + formatInt(acStats.get("skywars_wins_solo").getAsInt() + acStats.get("skywars_wins_team").getAsInt()) + "     Losses: "
-                                + formatInt(swStats.get("losses").getAsInt()));;
+                                + formatInt(swStats.get("losses").getAsInt()));
 
                         kdString = ratioCalc(swStats.get("kills").getAsFloat(),
                                 swStats.get("deaths").getAsFloat(), "kd");
@@ -63,16 +62,16 @@ public class Stats {
                     }
                     break;
                 case "solo_insane":
-                    returnStats = genericSW("Solo Insane", "solo_insane", acStats, playerStats);
+                    returnStats = genericSW("Solo Insane", "solo_insane", playerStats);
                     break;
                 case "solo_normal":
-                    returnStats = genericSW("Solo Normal", "solo_normal", acStats, playerStats);
+                    returnStats = genericSW("Solo Normal", "solo_normal", playerStats);
                     break;
                 case "teams_normal":
-                    returnStats = genericSW("Teams Normal", "team_normal", acStats, playerStats);
+                    returnStats = genericSW("Teams Normal", "team_normal", playerStats);
                     break;
                 case "teams_insane":
-                    returnStats = genericSW("Teams Insane", "team_insane", acStats, playerStats);
+                    returnStats = genericSW("Teams Insane", "team_insane", playerStats);
                     break;
 
                 case "BEDWARS":
@@ -112,66 +111,66 @@ public class Stats {
                 case "DUELS":
                     switch (GUIConfig.defaultDuel) {
                         case 0:
-                            returnStats = genericDuel("Classic 1v1", "classic_duel", acStats, playerStats);
+                            returnStats = genericDuel("Classic 1v1", "classic_duel", playerStats);
                             break;
                         case 1:
-                            returnStats = genericDuel("UHC 1v1", "uhc_duel", acStats, playerStats);
+                            returnStats = genericDuel("UHC 1v1", "uhc_duel", playerStats);
                             break;
                         case 2:
-                            returnStats = genericDuel("Combo 1v1", "combo_duel", acStats, playerStats);
+                            returnStats = genericDuel("Combo 1v1", "combo_duel", playerStats);
                             break;
                         case 3:
-                            returnStats = genericDuel("OP 1v1", "op_duel", acStats, playerStats);
+                            returnStats = genericDuel("OP 1v1", "op_duel", playerStats);
                             break;
                         case 4:
-                            returnStats = genericDuel("Blitz 1v1", "blitz_duel", acStats, playerStats);
+                            returnStats = genericDuel("Blitz 1v1", "blitz_duel", playerStats);
                             break;
                         case 5:
-                            returnStats = genericDuel("Sumo 1v1", "sumo_duel", acStats, playerStats);
+                            returnStats = genericDuel("Sumo 1v1", "sumo_duel", playerStats);
                             break;
                         case 6:
-                            returnStats = genericDuel("SkyWars 1v1", "sw_duel", acStats, playerStats);
+                            returnStats = genericDuel("SkyWars 1v1", "sw_duel", playerStats);
                             break;
                         case 7:
-                            returnStats = genericDuel("Bridge 1v1", "bridge_duel", acStats, playerStats);
+                            returnStats = genericDuel("Bridge 1v1", "bridge_duel", playerStats);
                             break;
                         case 8:
-                            returnStats = genericDuel("Bridge 2v2", "bridge_doubles", acStats, playerStats);
+                            returnStats = genericDuel("Bridge 2v2", "bridge_doubles", playerStats);
                             break;
                     }
                     break;
                 case "DUELS_CLASSIC_DUEL":
-                    returnStats = genericDuel("Classic 1v1", "classic_duel", acStats, playerStats);
+                    returnStats = genericDuel("Classic 1v1", "classic_duel", playerStats);
                     break;
                 case "DUELS_UHC_DUEL":
-                    returnStats = genericDuel("UHC 1v1", "uhc_duel", acStats, playerStats);
+                    returnStats = genericDuel("UHC 1v1", "uhc_duel", playerStats);
                     break;
                 case "DUELS_COMBO_DUEL":
-                    returnStats = genericDuel("Combo 1v1", "combo_duel", acStats, playerStats);
+                    returnStats = genericDuel("Combo 1v1", "combo_duel", playerStats);
                     break;
                 case "DUELS_OP_DUEL":
-                    returnStats = genericDuel("OP 1v1", "op_duel", acStats, playerStats);
+                    returnStats = genericDuel("OP 1v1", "op_duel", playerStats);
                     break;
                 case "DUELS_SUMO_DUEL":
-                    returnStats = genericDuel("Sumo 1v1", "sumo_duel", acStats, playerStats);
+                    returnStats = genericDuel("Sumo 1v1", "sumo_duel", playerStats);
                     break;
                 case "DUELS_BLITZ_DUEL":
-                    returnStats = genericDuel("Blitz 1v1", "blitz_duel", acStats, playerStats);
+                    returnStats = genericDuel("Blitz 1v1", "blitz_duel", playerStats);
                     break;
                 case "DUELS_BRIDGE_DUEL":
-                    returnStats = genericDuel("Bridge 1v1", "bridge_duel", acStats, playerStats);
+                    returnStats = genericDuel("Bridge 1v1", "bridge_duel", playerStats);
                     break;
                 case "DUELS_BRIDGE_DOUBLES":
-                    returnStats = genericDuel("Bridge 2v2", "bridge_doubles", acStats, playerStats);
+                    returnStats = genericDuel("Bridge 2v2", "bridge_doubles", playerStats);
                     break;
                 case "DUELS_OP_DOUBLES":
-                    returnStats = genericDuel("OP 2v2", "op_doubles", acStats, playerStats);
+                    returnStats = genericDuel("OP 2v2", "op_doubles", playerStats);
                     break;
                 case "DUELS_SW_DOUBLES":
-                    returnStats = genericDuel("SkyWars 2v2", "sw_doubles", acStats, playerStats);
+                    returnStats = genericDuel("SkyWars 2v2", "sw_doubles", playerStats);
                     break;
                 case "DUELS_SW_DUEL":
-                    returnStats = genericDuel("SkyWars 1v1", "sw_duel", acStats, playerStats);
+                    returnStats = genericDuel("SkyWars 1v1", "sw_duel", playerStats);
                     break;
 
                 case "teams":    // quake craft
@@ -234,9 +233,9 @@ public class Stats {
     }
 
 
-    private static ArrayList genericBW(String gamemodeFormatted, String gamemode, JsonObject acStats,
+    private static ArrayList<String> genericBW(String gamemodeFormatted, String gamemode, JsonObject acStats,
                                        JsonObject playerStats) { // TODO do this for more games
-        ArrayList result = new ArrayList();
+        ArrayList<String> result = new ArrayList<>();
         try {
             JsonObject bwStats = playerStats.get("Bedwars").getAsJsonObject();
             String kdString, wlString;
@@ -277,9 +276,9 @@ public class Stats {
     }
 
 
-    private static ArrayList genericSW(String gamemodeFormatted, String gamemode, JsonObject acStats,
-                                       JsonObject playerStats) {
-        ArrayList result = new ArrayList();
+    private static ArrayList<String> genericSW(String gamemodeFormatted, String gamemode,
+                                               JsonObject playerStats) {
+        ArrayList<String> result = new ArrayList<>();
         try {
             JsonObject swStats = playerStats.get("SkyWars").getAsJsonObject();
             String kdString, wlString;
@@ -306,13 +305,13 @@ public class Stats {
     }
 
 
-    private static ArrayList genericDuel(String gamemodeFormatted, String gamemode, JsonObject acStats,
-                                         JsonObject playerStats) {
-        ArrayList result = new ArrayList();
+    private static ArrayList<String> genericDuel(String gamemodeFormatted, String gamemode,
+                                                 JsonObject playerStats) {
+        ArrayList<String> result = new ArrayList<>();
         try {
             JsonObject duelStats = playerStats.get("Duels").getAsJsonObject();
             double lvl = getLevel(ApiRequest.exp);
-            Integer lvlInt = (int) Math.round(lvl);
+            int lvlInt = (int) Math.round(lvl);
             String kdString, wlString;
             String winstreak;
             result.add("Level: \u00A74" + lvlInt + "\u00A7f       Mode: \u00A75" + gamemodeFormatted);

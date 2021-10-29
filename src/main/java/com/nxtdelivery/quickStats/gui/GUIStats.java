@@ -1,27 +1,20 @@
 package com.nxtdelivery.quickStats.gui;
 
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraftforge.fml.common.Loader;
-import org.lwjgl.opengl.GL11;
-
 import com.nxtdelivery.quickStats.QuickStats;
 import com.nxtdelivery.quickStats.api.ApiRequest;
 import com.nxtdelivery.quickStats.util.LocrawUtil;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-
-import javax.imageio.ImageIO;
-import java.io.File;
-import java.net.URL;
+import org.lwjgl.opengl.GL11;
 
 public class GUIStats extends Gui {
     private static final Minecraft mc = Minecraft.getMinecraft();
@@ -179,7 +172,7 @@ public class GUIStats extends Gui {
             }
 
 
-            try {    //TODO image?
+            try {
                 if (api.image != null) {
                     DynamicTexture dynamic = new DynamicTexture(api.image);
                     ResourceLocation location = mc.getTextureManager().getDynamicTextureLocation("quickstats/user", dynamic);
@@ -204,7 +197,7 @@ public class GUIStats extends Gui {
             }
             if (guiScale == 0) {
                 if (GUIConfig.textShadow) {
-                    fr.drawStringWithShadow(title, 551 - fr.getStringWidth(title) / 2, 43, -1);
+                    fr.drawStringWithShadow(title, 521, 43, -1);
                 } else {
                     fr.drawString(title, 551 - fr.getStringWidth(title) / 2, 43, -1);
                 }
@@ -214,7 +207,7 @@ public class GUIStats extends Gui {
             try {
                 for (int i = 0; i < api.result.size(); i++) {
                     QuickStats.LOGGER.debug(api.result.get(i));
-                    resultMsg = api.result.get(i).toString();
+                    resultMsg = api.result.get(i);
                     if (GUIConfig.textShadow) {
                         fr.drawStringWithShadow(resultMsg, pad, (10 * i) + top + 40, -1);
                     } else {

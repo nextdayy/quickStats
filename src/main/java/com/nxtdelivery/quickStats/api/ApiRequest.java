@@ -1,5 +1,15 @@
 package com.nxtdelivery.quickStats.api;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.nxtdelivery.quickStats.QuickStats;
+import com.nxtdelivery.quickStats.gui.GUIConfig;
+import com.nxtdelivery.quickStats.util.LocrawUtil;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
+
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,26 +19,12 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.nxtdelivery.quickStats.QuickStats;
-import com.nxtdelivery.quickStats.gui.GUIConfig;
-import com.nxtdelivery.quickStats.util.LocrawUtil;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.ResourceLocation;
-
-import javax.imageio.ImageIO;
-
 public class ApiRequest extends Thread {
     private static final Minecraft mc = Minecraft.getMinecraft();
     String username, rank, rankColor, playerName;
     public JsonObject rootStats, achievementStats;
     public String formattedName;
-    public ArrayList result;
+    public ArrayList<String> result;
     public static double exp;
     public boolean noUser = false;
     public boolean generalError = false;
@@ -71,7 +67,11 @@ public class ApiRequest extends Thread {
         }
         /* get head texture */
         try {
-            image = ImageIO.read(new URL("https://cravatar.eu/avatar/" + uuid));
+            if(GUIConfig.avatarHead) {
+                image = ImageIO.read(new URL("https://cravatar.eu/helmhead/" + uuid));
+            } else {
+                image = ImageIO.read(new URL("https://cravatar.eu/helmavatar/" + uuid));
+            }
         } catch (Exception e) {
             if (GUIConfig.debugMode) {
                 e.printStackTrace();
@@ -124,7 +124,11 @@ public class ApiRequest extends Thread {
                 } catch (NullPointerException e) {
                     rank = "non";
                 }
-                formattedName = getFormattedName(playerName, rank, rankColor);
+                if(playerName.equals("Technoblade")) {      // Technoblade never dies
+                    formattedName = "\u00A7d[PIG\u00A7b+++\u00A7d] Technoblade";
+                } else {
+                    formattedName = getFormattedName(playerName, rank, rankColor);
+                }
 
                 rootStats = js2.get("stats").getAsJsonObject();
                 achievementStats = js2.get("achievements").getAsJsonObject();
@@ -206,6 +210,7 @@ public class ApiRequest extends Thread {
                 case "BLACK":
                     formattedName += "\u00A70+";
                     break;
+                case "LIGHT_PURPLE":
                 case "PINK":
                     formattedName += "\u00A7d+";
                     break;
@@ -235,9 +240,6 @@ public class ApiRequest extends Thread {
                     break;
                 case "DARK_AQUA":
                     formattedName += "\u00A73+";
-                    break;
-                case "LIGHT_PURPLE":
-                    formattedName += "\u00A7d+";
                     break;
                 default:
                     formattedName += "+";

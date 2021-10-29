@@ -1,11 +1,7 @@
-/* Changelog v1.4.7
- *  add quake default game
- *  support to change duel mode in lobbies
- *  fixes to skywars stats in lobbies
- *  added showing of player head on stats window
- *  improvements to configuration
- *  begin implementation of compact mode
- *  add number formatting
+/* Changelog v1.4.8
+ *  lots of code cleaning so intellij doesn't moan at me
+ *  add custom ranks
+ *  add 3D heads and helm-avatars to GUI
  *  bug fixes
  *  code cleanup
  */

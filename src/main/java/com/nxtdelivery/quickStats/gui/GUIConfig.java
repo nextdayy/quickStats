@@ -15,7 +15,6 @@ import gg.essential.vigilance.data.PropertyType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.util.ReportedException;
-import scala.reflect.internal.Types;
 
 
 public class GUIConfig extends Vigilant {
@@ -253,6 +252,12 @@ public class GUIConfig extends Vigilant {
             category = "Gui Settings", subcategory = "Gui"
     )
     public static boolean compactMode = false;
+    @Property(
+            type = PropertyType.SWITCH, name = "3D Heads",
+            description = "Enable 3D heads on the GUI window.",
+            category = "Gui Settings", subcategory = "Gui"
+    )
+    public static boolean avatarHead = false;
 
 
     @Property(
