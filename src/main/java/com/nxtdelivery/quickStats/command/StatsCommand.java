@@ -1,13 +1,15 @@
 package com.nxtdelivery.quickStats.command;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.nxtdelivery.quickStats.*;
+import com.nxtdelivery.quickStats.QuickStats;
+import com.nxtdelivery.quickStats.Reference;
 import com.nxtdelivery.quickStats.gui.GUIConfig;
 import com.nxtdelivery.quickStats.gui.GUIStats;
-import com.nxtdelivery.quickStats.util.*;
+import com.nxtdelivery.quickStats.util.GetEntity;
+import com.nxtdelivery.quickStats.util.LocrawUtil;
+import com.nxtdelivery.quickStats.util.TickDelay;
+import com.nxtdelivery.quickStats.util.UpdateChecker;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
@@ -15,6 +17,12 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import static net.minecraft.command.CommandBase.getListOfStringsMatchingLastWord;
 
 public class StatsCommand implements ICommand {
 
@@ -123,7 +131,20 @@ public class StatsCommand implements ICommand {
 
     @Override
     public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
-        return null;
+        try {
+            Collection<NetworkPlayerInfo> players = mc.getNetHandler().getPlayerInfoMap();
+            List<String> list = new ArrayList<>();
+            for (NetworkPlayerInfo info : players) {
+                list.add(info.getGameProfile().getName());
+            }
+            //String output = String.join(", ", list);
+            return getListOfStringsMatchingLastWord(args, list.toArray(new String[0]));
+        } catch (Exception e) {
+            if (GUIConfig.debugMode) {
+                e.printStackTrace();
+            }
+            return null;
+        }
     }
 
     @Override

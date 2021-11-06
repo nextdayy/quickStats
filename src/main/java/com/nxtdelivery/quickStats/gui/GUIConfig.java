@@ -1,20 +1,19 @@
 package com.nxtdelivery.quickStats.gui;
 
-import java.awt.Color;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-
 import com.nxtdelivery.quickStats.QuickStats;
 import com.nxtdelivery.quickStats.Reference;
-
-import gg.essential.vigilance.*;
+import gg.essential.vigilance.Vigilant;
 import gg.essential.vigilance.data.Property;
 import gg.essential.vigilance.data.PropertyType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.util.ReportedException;
+
+import java.awt.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 
 
 public class GUIConfig extends Vigilant {
@@ -33,17 +32,29 @@ public class GUIConfig extends Vigilant {
     )
     public static boolean autoGame = true;
     @Property(
+            type = PropertyType.SWITCH, name = "Compatibility Fix",
+            description = "Change how the automatic game utility works in an attempt to increase compatibility.\n\u00A7eExperimental!",
+            category = "General", subcategory = "Game Detection"
+    )
+    public static boolean locrawComp = false;
+    @Property(
             type = PropertyType.SWITCH, name = "Sound",
             description = "Enable/Disable sound feedback of the mod on player detection.",
             category = "General", subcategory = "General"
     )
     public static boolean doSound = true;
     @Property(
-            type = PropertyType.SWITCH, name = "Compatibility Fix",
-            description = "Change how the automatic game utility works in an attempt to increase compatibility.\n\u00A7eExperimental!",
-            category = "General", subcategory = "Game Detection"
+            type = PropertyType.SWITCH, name = "Party Detection",
+            description = "Enable/Disable detection of your name being mentioned to trigger players' stats.\nUseful for BedWars parties.",
+            category = "General", subcategory = "Parties"
     )
-    public static boolean locrawComp = false;
+    public static boolean doPartyDetection = true;
+    @Property(
+            type = PropertyType.SWITCH, name = "Party Detection++",
+            description = "Enable/Disable detection of a phrase being said triggering stats.\nHave 'say <word or phrase>' in your chat message to set this.",
+            category = "General", subcategory = "Parties"
+    )
+    public static boolean doPartyDetectionPLUS = true;
     @Property(
             type = PropertyType.SELECTOR, name = "Default Game",
             description = "Game to show stats for if nothing else is found.\nIf you want it to always show this stat, disable Automatic game detection.",
@@ -58,6 +69,14 @@ public class GUIConfig extends Vigilant {
             options = {"Classic", "UHC", "Combo", "OP", "Blitz", "Sumo", "SkyWars", "Bridge 1v1", "Bridge 2v2"}
     )
     public static int defaultDuel = 0;
+    @Property(
+            type = PropertyType.SLIDER, name = "Detection Distance",
+            description = "Change the maximum distance a player can be detected from with the keybind.",
+            category = "General", subcategory = "General",
+            min = 5, max = 250
+    )
+    public static int maxDetect = 200;
+
 
     @Property(
             type = PropertyType.TEXT,
@@ -108,27 +127,22 @@ public class GUIConfig extends Vigilant {
         } catch (Exception e) {
             QuickStats.LOGGER.error("failed to clear config, " + e);
         }
-        CrashReport report = CrashReport.makeCrashReport(new Throwable()
-        {
-            @Override public String getMessage(){ return "[QuickStats] Manually initiated crash: Cleaning configuration file. THIS IS NOT AN ERROR"; }
-            @Override public void printStackTrace(final PrintWriter s){ s.println(getMessage()); }
-            @Override public void printStackTrace(final PrintStream s) { s.println(getMessage()); }
+        CrashReport report = CrashReport.makeCrashReport(new Throwable() {
+            @Override
+            public String getMessage() {
+                return "[QuickStats] Manually initiated crash: Cleaning configuration file. THIS IS NOT AN ERROR";
+            }
+
+            @Override
+            public void printStackTrace(final PrintWriter s) {
+                s.println(getMessage());
+            }
+
+            @Override
+            public void printStackTrace(final PrintStream s) {
+                s.println(getMessage());
+            }
         }, "Cleaning Configuration file");
-        throw new ReportedException(report);
-    }
-    @Property(
-            type = PropertyType.BUTTON, name = "Secret Button",
-            description = "I wonder what this does? Only one way to find out...",
-            category = "Support", subcategory = "Other"
-    )
-    public static void secret() {           // okay this might be bad, but it's actually useful for testing
-        CrashReport report = CrashReport.makeCrashReport(new Throwable()
-        {
-            @Override public String getMessage(){ return "[QuickStats] Manually initiated crash: Cleaning configuration file. THIS IS NOT AN ERROR"; }
-            @Override public void printStackTrace(final PrintWriter s){ s.println(getMessage()); }
-            @Override public void printStackTrace(final PrintStream s) { s.println(getMessage()); }
-        }, "Cleaning Configuration file");
-        System.out.println(report);
         throw new ReportedException(report);
     }
 
@@ -280,6 +294,7 @@ public class GUIConfig extends Vigilant {
         addDependency("winTop", "sizeEnabled");
         addDependency("winBottom", "sizeEnabled");
         addDependency("winMiddle", "sizeEnabled");
+        addDependency("doPartyDetectionPLUS", "doPartyDetection");
 
     }
 }

@@ -1,13 +1,13 @@
 package com.nxtdelivery.quickStats.api;
 
+import com.google.gson.JsonObject;
+import com.nxtdelivery.quickStats.gui.GUIConfig;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Objects;
-
-import com.google.gson.JsonObject;
-import com.nxtdelivery.quickStats.gui.GUIConfig;
 
 public class Stats {
     public static ArrayList<String> getStats(JsonObject playerStats, JsonObject acStats, String game) {
@@ -79,7 +79,7 @@ public class Stats {
                         JsonObject bwStats = playerStats.get("Bedwars").getAsJsonObject();
                         returnStats.add("Level: \u00A79" + acStats.get("bedwars_level").getAsString() + "✫"
                                 + "\u00A7f       Game: \u00A72BedWars");
-                        returnStats.add("Wins: \u00A75" + acStats.get("bedwars_wins").getAsString()
+                        returnStats.add("Wins: \u00A75" + formatInt(acStats.get("bedwars_wins").getAsInt())
                                 + "\u00A7f      Coins: \u00A76" + formatInt(bwStats.get("coins").getAsInt()));
                         returnStats.add("Kills: " + formatInt(bwStats.get("kills_bedwars").getAsInt()) + "     Deaths: "
                                 + formatInt(bwStats.get("deaths_bedwars").getAsInt()));
@@ -181,11 +181,11 @@ public class Stats {
                         int lvlInt = (int) Math.round(lvl);
                         returnStats.add("Level: \u00A74" + lvlInt + "\u00A7f       Mode: \u00A75 Quakecraft");
                         returnStats.add("Godlikes: \u00A75" + acStats.get("quake_godlikes").getAsString() + "\u00A7f     Coins: \u00A76"
-                                + qkStats.get("coins").getAsString());
-                        returnStats.add("Kills: " + qkStats.get("kills").getAsString() + "     Deaths: "
-                                + qkStats.get("deaths").getAsString());
-                        returnStats.add("Wins: " + qkStats.get("wins").getAsString() + "     Headshots: "
-                                + qkStats.get("headshots").getAsString());
+                                + formatInt(qkStats.get("coins").getAsInt()));
+                        returnStats.add("Kills: " + formatInt(qkStats.get("kills").getAsInt()) + "     Deaths: "
+                                + formatInt(qkStats.get("deaths").getAsInt()));
+                        returnStats.add("Wins: " + formatInt(qkStats.get("wins").getAsInt()) + "     Headshots: "
+                                + formatInt(qkStats.get("headshots").getAsInt()));
                         kdString = ratioCalc(qkStats.get("kills").getAsFloat(),
                                 qkStats.get("deaths").getAsFloat(), "kd");
                         wlString = ratioCalc(qkStats.get("wins").getAsFloat(),
@@ -234,7 +234,7 @@ public class Stats {
 
 
     private static ArrayList<String> genericBW(String gamemodeFormatted, String gamemode, JsonObject acStats,
-                                       JsonObject playerStats) { // TODO do this for more games
+                                               JsonObject playerStats) { // TODO do this for more games
         ArrayList<String> result = new ArrayList<>();
         try {
             JsonObject bwStats = playerStats.get("Bedwars").getAsJsonObject();
@@ -242,22 +242,21 @@ public class Stats {
             result.add("Level: \u00A79" + acStats.get("bedwars_level").getAsString() + "✫" + "\u00A7f    Mode: \u00A72"
                     + gamemodeFormatted);
             if (GUIConfig.compactMode) {
-                result.add("W: \u00A75" + bwStats.get(gamemode + "_wins_bedwars").getAsString()
+                result.add("W: \u00A75" + formatInt(bwStats.get(gamemode + "_wins_bedwars").getAsInt())
                         + "\u00A7f      Coins: \u00A76" + formatInt(bwStats.get("coins").getAsInt()));
-                result.add("K: " + bwStats.get(gamemode + "_kills_bedwars").getAsString() + "     D: "
+                result.add("K: " + formatInt(bwStats.get(gamemode + "_kills_bedwars").getAsInt()) + "     D: "
                         + formatInt(bwStats.get(gamemode + "_deaths_bedwars").getAsInt()));
                 result.add("FK: " + formatInt(bwStats.get(gamemode + "_final_kills_bedwars").getAsInt())
                         + "     FD: " + formatInt(bwStats.get(gamemode + "_final_deaths_bedwars").getAsInt()));
-
                 kdString = ratioCalc(bwStats.get(gamemode + "_final_kills_bedwars").getAsFloat(),
                         bwStats.get(gamemode + "_final_deaths_bedwars").getAsFloat(), "kd");
                 wlString = ratioCalc(bwStats.get(gamemode + "_wins_bedwars").getAsFloat(),
                         bwStats.get(gamemode + "_losses_bedwars").getAsFloat(), "wins");
                 result.add("FK/D: " + kdString + "      W/L: " + wlString);
             } else {
-                result.add("Wins: \u00A75" + bwStats.get(gamemode + "_wins_bedwars").getAsString()
+                result.add("Wins: \u00A75" + formatInt(bwStats.get(gamemode + "_wins_bedwars").getAsInt())
                         + "\u00A7f      Coins: \u00A76" + formatInt(bwStats.get("coins").getAsInt()));
-                result.add("Kills: " + bwStats.get(gamemode + "_kills_bedwars").getAsString() + "     Deaths: "
+                result.add("Kills: " + formatInt(bwStats.get(gamemode + "_kills_bedwars").getAsInt()) + "     Deaths: "
                         + formatInt(bwStats.get(gamemode + "_deaths_bedwars").getAsInt()));
                 result.add("Final Kills: " + formatInt(bwStats.get(gamemode + "_final_kills_bedwars").getAsInt())
                         + "     Final Deaths: " + formatInt(bwStats.get(gamemode + "_final_deaths_bedwars").getAsInt()));

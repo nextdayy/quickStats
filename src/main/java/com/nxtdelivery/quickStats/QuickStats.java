@@ -1,17 +1,21 @@
-/* Changelog v1.4.8
- *  lots of code cleaning so intellij doesn't moan at me
- *  add custom ranks
- *  add 3D heads and helm-avatars to GUI
+/* Changelog v1.5
+ *  cleanup getEntity
+ *  changes to API utility
+ *  added party utility system
+ *  added tab completion options to command
  *  bug fixes
  *  code cleanup
  */
 
 package com.nxtdelivery.quickStats;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.lwjgl.input.Keyboard;
-
+import com.nxtdelivery.quickStats.command.StatsCommand;
+import com.nxtdelivery.quickStats.gui.GUIConfig;
+import com.nxtdelivery.quickStats.gui.GUIStats;
+import com.nxtdelivery.quickStats.util.GetEntity;
+import com.nxtdelivery.quickStats.util.TickDelay;
+import com.nxtdelivery.quickStats.util.UpdateChecker;
+import gg.essential.universal.wrappers.message.UTextComponent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -33,13 +37,10 @@ import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
-
-import com.nxtdelivery.quickStats.command.StatsCommand;
-import com.nxtdelivery.quickStats.gui.GUIConfig;
-import com.nxtdelivery.quickStats.gui.GUIStats;
-import com.nxtdelivery.quickStats.util.*;
-
-import gg.essential.vigilance.Vigilance;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.lwjgl.input.Keyboard;
 
 @Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION)
 public class QuickStats {
@@ -53,13 +54,14 @@ public class QuickStats {
     public static boolean betaFlag = false;
     public static boolean locraw = false;
     public static boolean corrupt = false;
+    boolean set = false;
+    String partySet;
 
 
     @EventHandler()
     public void init(FMLInitializationEvent event) {
         LOGGER.info("reading config...");
         try {
-            Vigilance.initialize();
             GUIConfig.INSTANCE.preload();
             LOGGER.info("config read was successful");
         } catch (Exception e) {
@@ -125,7 +127,64 @@ public class QuickStats {
                 }
             }
         }
+        if (GUIConfig.doPartyDetection) {
+            try {
+                if (GUIConfig.doPartyDetectionPLUS) {
+                    if (event.message.getUnformattedText().contains("say") && getUsernameFromChat(event.message.getUnformattedText()).equals(mc.thePlayer.getName())) {
+                        try {
+                            String unformatted = UTextComponent.Companion.stripFormatting(event.message.getUnformattedText());
+                            partySet = StringUtils.substringAfter(unformatted, "say ");
+                            set = true;
+                            if (partySet.contains("my name")) {
+                                partySet = null;
+                                set = false;
+                            }
+                            if (GUIConfig.debugMode) {
+                                LOGGER.info(partySet);
+                            }
+                        } catch (Exception e) {
+                            if (GUIConfig.debugMode) {
+                                e.printStackTrace();
+                                set = false;
+                            }
+                        }
+                    }
+                }
+                if (event.message.getUnformattedText().contains(mc.thePlayer.getName())) {
+                    //System.out.println(event.message.getUnformattedText());
+                    if (!event.message.getUnformattedText().contains("lobby!")) {
+                        String username = getUsernameFromChat(event.message.getUnformattedText());
+                        if (!username.equalsIgnoreCase(mc.thePlayer.getName())) {
+                            new GUIStats(username);
+                        }
+                    }
+                }
+                if (set && event.message.getUnformattedText().contains(partySet)) {
+                    String username = getUsernameFromChat(event.message.getUnformattedText());
+                    if (!username.equalsIgnoreCase(mc.thePlayer.getName())) {
+                        new GUIStats(username);
+                    }
+                }
+            } catch (Exception e) {
+                if (GUIConfig.debugMode) {
+                    //e.printStackTrace();
+                }
+            }
+        }
     }
+
+    public String getUsernameFromChat(String message) {
+        try {
+            String unformatted = UTextComponent.Companion.stripFormatting(message);
+            return unformatted.substring(unformatted.lastIndexOf("]") + 2, unformatted.lastIndexOf(":"));
+        } catch (Exception e) {
+            if (GUIConfig.debugMode) {
+                e.printStackTrace();
+            }
+            return message;
+        }
+    }
+
 
     @SubscribeEvent
     public void onWorldLoad(WorldEvent.Load event) {

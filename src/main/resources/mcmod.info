@@ -1,16 +1,18 @@
 [
-{
-  "modid": "${id}",
-  "name": "${name}",
-  "description": "Mod to show stats of other nearby players in hypixel games.",
-  "version": "${version}",
-  "mcversion": "${mcversion}",
-  "url": "https://github.com/nxtdaydelivery/quickStats",
-  "updateUrl": "",
-  "authorList": ["nxtdaydelivery"],
-  "credits": "nxtdaydelivery, and thanks Wyvest for the help!",
-  "logoFile": "",
-  "screenshots": [],
-  "dependencies": []
-}
+  {
+    "modid": "${id}",
+    "name": "${name}",
+    "description": "Mod to show stats of other nearby players in hypixel games.",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "https://github.com/nxtdaydelivery/quickStats",
+    "updateUrl": "",
+    "authorList": [
+      "nxtdaydelivery"
+    ],
+    "credits": "nxtdaydelivery, and thanks Wyvest for the help!",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
 ]

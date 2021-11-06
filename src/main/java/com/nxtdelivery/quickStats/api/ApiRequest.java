@@ -31,6 +31,7 @@ public class ApiRequest extends Thread {
     public boolean noAPI = false;
     public String uuid;
     public BufferedImage image;
+    int startTime, endTime;
 
     /**
      * Create a new instance of the API request function, with a username.
@@ -39,6 +40,7 @@ public class ApiRequest extends Thread {
         username = uname;
         this.setName("QuickStats API");
         this.start();
+        startTime = (int) System.currentTimeMillis();
     }
 
     public void run() {
@@ -67,7 +69,7 @@ public class ApiRequest extends Thread {
         }
         /* get head texture */
         try {
-            if(GUIConfig.avatarHead) {
+            if (GUIConfig.avatarHead) {
                 image = ImageIO.read(new URL("https://cravatar.eu/helmhead/" + uuid));
             } else {
                 image = ImageIO.read(new URL("https://cravatar.eu/helmavatar/" + uuid));
@@ -92,14 +94,9 @@ public class ApiRequest extends Thread {
                 responseStrBuilder.append(inputStr);
             // System.out.println(responseStrBuilder.toString);
             JsonObject js1 = new JsonParser().parse(responseStrBuilder.toString()).getAsJsonObject();
-            /*
-             * for(String key: flattenJson.keySet()){ // DEBUG: print all keys
-             * System.out.println(key); }
-             */
 
             boolean success = js1.get("success").getAsBoolean();
             if (success) {
-                QuickStats.LOGGER.info("successfully processed from Hypixel");
                 JsonObject js2 = js1.get("player").getAsJsonObject();
                 try { // get rank and name
                     exp = js2.get("networkExp").getAsDouble();
@@ -124,7 +121,7 @@ public class ApiRequest extends Thread {
                 } catch (NullPointerException e) {
                     rank = "non";
                 }
-                if(playerName.equals("Technoblade")) {      // Technoblade never dies
+                if (playerName.equals("Technoblade")) {      // Technoblade never dies
                     formattedName = "\u00A7d[PIG\u00A7b+++\u00A7d] Technoblade";
                 } else {
                     formattedName = getFormattedName(playerName, rank, rankColor);
@@ -133,6 +130,8 @@ public class ApiRequest extends Thread {
                 rootStats = js2.get("stats").getAsJsonObject();
                 achievementStats = js2.get("achievements").getAsJsonObject();
                 result = Stats.getStats(rootStats, achievementStats, LocrawUtil.gameType);
+                endTime = (int) System.currentTimeMillis() - startTime;
+                QuickStats.LOGGER.info("successfully processed all data in " + endTime + "ms");
             } else {
                 mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
                         + "[QuickStats] The Hypixel API didn't process the request properly. Try again."));

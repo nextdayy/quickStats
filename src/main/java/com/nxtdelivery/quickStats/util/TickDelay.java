@@ -1,43 +1,43 @@
 package com.nxtdelivery.quickStats.util;
 
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.common.MinecraftForge;
 
 public class TickDelay {
-	Integer delay;
-	Runnable function;
+    Integer delay;
+    Runnable function;
 
-	public TickDelay(Runnable functionName, int ticks) {
-		register();
-		delay = ticks;
-		function = functionName;
-	}
+    public TickDelay(Runnable functionName, int ticks) {
+        register();
+        delay = ticks;
+        function = functionName;
+    }
 
-	@SubscribeEvent
-	public void onTick(TickEvent.ClientTickEvent event) {
-		if (event.phase == TickEvent.Phase.START) {
-			// Delay expired
-			if (delay < 1) {
-				run();
-				destroy();
-			}
-			delay--;
-		}
-	}
+    @SubscribeEvent
+    public void onTick(TickEvent.ClientTickEvent event) {
+        if (event.phase == TickEvent.Phase.START) {
+            // Delay expired
+            if (delay < 1) {
+                run();
+                destroy();
+            }
+            delay--;
+        }
+    }
 
-	@EventHandler()
-	private void destroy() {
-		MinecraftForge.EVENT_BUS.unregister(this);
-	}
+    @EventHandler()
+    private void destroy() {
+        MinecraftForge.EVENT_BUS.unregister(this);
+    }
 
-	@EventHandler()
-	private void register() {
-		MinecraftForge.EVENT_BUS.register(this);
-	}
+    @EventHandler()
+    private void register() {
+        MinecraftForge.EVENT_BUS.register(this);
+    }
 
-	private void run() {
-		function.run();
-	}
+    private void run() {
+        function.run();
+    }
 }

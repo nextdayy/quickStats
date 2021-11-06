@@ -177,7 +177,7 @@ public class GUIStats extends Gui {
                     DynamicTexture dynamic = new DynamicTexture(api.image);
                     ResourceLocation location = mc.getTextureManager().getDynamicTextureLocation("quickstats/user", dynamic);
                     mc.getTextureManager().bindTexture(location);
-                    GlStateManager.color(1F, 1F, 1F, 1f);
+                    GlStateManager.color(1F, 1F, 1F, 1F);
                     drawModalRectWithCustomSizedTexture(middle - halfWidth + 3, top + 4, 0, 0, 14, 14, 14, 14);
                 }
             } catch (Exception e) {
@@ -211,6 +211,7 @@ public class GUIStats extends Gui {
                     if (GUIConfig.textShadow) {
                         fr.drawStringWithShadow(resultMsg, pad, (10 * i) + top + 40, -1);
                     } else {
+                        //int pad1 = (int) ((int) (width - halfWidth +2) * 1.25);
                         fr.drawString(resultMsg, pad, (10 * i) + top + 40, -1);
                     }
                 }
