@@ -2,6 +2,7 @@ package com.nxtdelivery.quickStats.gui;
 
 import com.nxtdelivery.quickStats.QuickStats;
 import com.nxtdelivery.quickStats.Reference;
+import com.nxtdelivery.quickStats.util.TickDelay;
 import gg.essential.vigilance.Vigilant;
 import gg.essential.vigilance.data.Property;
 import gg.essential.vigilance.data.PropertyType;
@@ -45,16 +46,16 @@ public class GUIConfig extends Vigilant {
     public static boolean doSound = true;
     @Property(
             type = PropertyType.SWITCH, name = "Party Detection",
-            description = "Enable/Disable detection of your name being mentioned to trigger players' stats.\nUseful for BedWars parties.\n\u00A7eCurrently under development! Might cause lag if spammed!",
+            description = "Enable/Disable detection of your name being mentioned to trigger players' stats.\n\u00A7eUseful for BedWars parties.",
             category = "General", subcategory = "Parties"
     )
-    public static boolean doPartyDetection = false;
+    public static boolean doPartyDetection = true;
     @Property(
             type = PropertyType.SWITCH, name = "Party Detection++",
             description = "Enable/Disable detection of a phrase being said triggering stats.\nHave 'say <word or phrase>' in your chat message to set this.",
             category = "General", subcategory = "Parties"
     )
-    public static boolean doPartyDetectionPLUS = false;
+    public static boolean doPartyDetectionPLUS = true;
     @Property(
             type = PropertyType.SELECTOR, name = "Default Game",
             description = "Game to show stats for if nothing else is found.\nIf you want it to always show this stat, disable Automatic game detection.",
@@ -118,6 +119,7 @@ public class GUIConfig extends Vigilant {
             category = "Support", subcategory = "General"
     )
     public static void reset() {
+        mc.thePlayer.closeScreen();         //TODO
         try {
             FileWriter writer = new FileWriter("./config/quickStats.toml");
             writer.write("this was cleared so it will be reset on next restart.");
@@ -143,7 +145,7 @@ public class GUIConfig extends Vigilant {
                 s.println(getMessage());
             }
         }, "Cleaning Configuration file");
-        throw new ReportedException(report);
+        new TickDelay(() -> {throw new ReportedException(report);},0);
     }
 
 
@@ -208,28 +210,28 @@ public class GUIConfig extends Vigilant {
             type = PropertyType.SLIDER, name = "Window Width",
             description = "Change the window width.",
             category = "Gui Settings", subcategory = "Size",
-            min = 60, max = 150
+            min = 65, max = 180
     )
     public static int winWidth = 82;
     @Property(
             type = PropertyType.SLIDER, name = "Window Top",
             description = "Change the position of the top of the window.",
             category = "Gui Settings", subcategory = "Size",
-            min = 5, max = 200
+            min = 5, max = 400
     )
     public static int winTop = 50;
     @Property(
             type = PropertyType.SLIDER, name = "Window Bottom",
             description = "Change the position of the bottom of the window.",
             category = "Gui Settings", subcategory = "Size",
-            min = 50, max = 250
+            min = 50, max = 550
     )
     public static int winBottom = 115;
     @Property(
             type = PropertyType.SLIDER, name = "Window Position",
             description = "Change the position of the window.",
             category = "Gui Settings", subcategory = "Size",
-            min = -150, max = 450
+            min = -350, max = 450
     )
     public static int winMiddle = 90;
 
@@ -272,6 +274,13 @@ public class GUIConfig extends Vigilant {
             category = "Gui Settings", subcategory = "Gui"
     )
     public static boolean avatarHead = false;
+    @Property(
+            type = PropertyType.DECIMAL_SLIDER, name = "Window Time",
+            description = "How long the stats window should display for. (default: 7)",
+            category = "Gui Settings", subcategory = "Gui",
+            minF = 3f, maxF = 10f
+    )
+    public static float GUITime = 7f;
 
 
     @Property(

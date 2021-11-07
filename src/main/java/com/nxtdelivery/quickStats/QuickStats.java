@@ -1,6 +1,7 @@
 /* Changelog v1.5.1
  *  cleanup getEntity
  *  fix the party utility
+ *  added window time
  *  major rewrite of how the system works to improve performance
  *  bug fixes
  *  code cleanup
@@ -50,7 +51,7 @@ public class QuickStats {
     private KeyBinding statsKey;
     public static final Logger LOGGER = LogManager.getLogger("QuickStats");
     public static boolean updateCheck;
-    public static boolean betaFlag = false;
+    public static boolean betaFlag = true;
     public static boolean locraw = false;
     public static boolean corrupt = false;
     public static LocrawUtil LocInst;
@@ -137,6 +138,9 @@ public class QuickStats {
                 LocInst.send();
             }
             try {
+                if (event.message.getUnformattedText().contains("Party ")) {
+                    return;
+                }
                 if (GUIConfig.doPartyDetectionPLUS) {
                     if (event.message.getUnformattedText().contains("say") && getUsernameFromChat(event.message.getUnformattedText()).equals(mc.thePlayer.getName())) {
                         try {
@@ -157,6 +161,13 @@ public class QuickStats {
                             }
                         }
                     }
+                    if (set && event.message.getUnformattedText().contains(partySet) && LocrawUtil.lobby) {
+                        String username = getUsernameFromChat(event.message.getUnformattedText());
+                        if (!username.equalsIgnoreCase(mc.thePlayer.getName())) {
+                            GuiInst.showGUI(username);
+                            return;
+                        }
+                    }
                 }
                 if (event.message.getUnformattedText().contains(mc.thePlayer.getName()) && LocrawUtil.lobby) {
                     if (!event.message.getUnformattedText().contains("lobby!")) {
@@ -165,12 +176,6 @@ public class QuickStats {
                             GuiInst.showGUI(username);
                             return;
                         }
-                    }
-                }
-                if (set && event.message.getUnformattedText().contains(partySet) && LocrawUtil.lobby) {
-                    String username = getUsernameFromChat(event.message.getUnformattedText());
-                    if (!username.equalsIgnoreCase(mc.thePlayer.getName())) {
-                        GuiInst.showGUI(username);
                     }
                 }
             } catch (Exception e) {

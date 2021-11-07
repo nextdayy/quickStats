@@ -5,7 +5,6 @@ import com.google.gson.JsonParser;
 import com.nxtdelivery.quickStats.QuickStats;
 import com.nxtdelivery.quickStats.gui.GUIConfig;
 import net.minecraft.client.Minecraft;
-import net.minecraft.stats.IStatStringFormat;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod.EventHandler;

@@ -17,6 +17,9 @@ public class Stats {
             try {
                 game = game.substring(1, game.length() - 1); // fix for too many speech marks
                 // System.out.println(game);
+                if(game.equals("MAIN")) {
+                    throw new NullPointerException("default game");
+                }
             } catch (Exception e) {
                 //if(GUIConfig.debugMode) {e.printStackTrace();}
                 System.out.println(GUIConfig.defaultGame);

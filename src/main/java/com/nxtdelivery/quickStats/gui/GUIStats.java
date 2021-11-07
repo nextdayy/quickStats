@@ -17,7 +17,7 @@ import org.lwjgl.opengl.GL11;
 
 public class GUIStats extends Gui {
     private static final Minecraft mc = Minecraft.getMinecraft();
-    private final FontRenderer fr = mc.fontRendererObj;
+    FontRenderer fr = mc.fontRendererObj;
     long systemTime = Minecraft.getSystemTime();
     final ScaledResolution resolution = new ScaledResolution(mc);
     Integer height, width, top, bottom, middle, halfWidth, seed, pad;
@@ -30,13 +30,15 @@ public class GUIStats extends Gui {
     public GUIStats() {
         register();
     }
+
     public void showGUI(String user) {
+        fr = mc.fontRendererObj;
         height = resolution.getScaledHeight();
         width = resolution.getScaledWidth();
         guiScale = mc.gameSettings.guiScale;
         systemTime = Minecraft.getSystemTime();
         frames = 5 * 60;
-        framesLeft = 7 * 60; // first number = delay before progress bar (def: 7)
+        framesLeft = ((long) GUIConfig.GUITime) * 60; // first number = delay before progress bar (def: 7)
         fifth = frames / 5;
         upperThreshold = frames - fifth;
         lowerThreshold = fifth;
@@ -80,7 +82,6 @@ public class GUIStats extends Gui {
         }
         seed = (halfWidth * 2);
         if (QuickStats.locraw) {
-            System.out.println("locraw needed!");
             QuickStats.locraw = false;
             QuickStats.LocInst.send();
         }
@@ -96,6 +97,7 @@ public class GUIStats extends Gui {
     public void delete() {
         MinecraftForge.EVENT_BUS.unregister(this);
     }
+
     @EventHandler()
     public void register() {
         MinecraftForge.EVENT_BUS.register(this);
