@@ -1,8 +1,7 @@
-/* Changelog v1.5
+/* Changelog v1.5.1
  *  cleanup getEntity
- *  changes to API utility
- *  added party utility system
- *  added tab completion options to command
+ *  fix the party utility
+ *  major rewrite of how the system works to improve performance
  *  bug fixes
  *  code cleanup
  */
@@ -13,9 +12,9 @@ import com.nxtdelivery.quickStats.command.StatsCommand;
 import com.nxtdelivery.quickStats.gui.GUIConfig;
 import com.nxtdelivery.quickStats.gui.GUIStats;
 import com.nxtdelivery.quickStats.util.GetEntity;
+import com.nxtdelivery.quickStats.util.LocrawUtil;
 import com.nxtdelivery.quickStats.util.TickDelay;
 import com.nxtdelivery.quickStats.util.UpdateChecker;
-import gg.essential.universal.wrappers.message.UTextComponent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -54,12 +53,16 @@ public class QuickStats {
     public static boolean betaFlag = false;
     public static boolean locraw = false;
     public static boolean corrupt = false;
+    public static LocrawUtil LocInst;
+    public static GUIStats GuiInst;
     boolean set = false;
     String partySet;
 
 
     @EventHandler()
     public void init(FMLInitializationEvent event) {
+        LocInst = new LocrawUtil();
+        GuiInst = new GUIStats();
         LOGGER.info("reading config...");
         try {
             GUIConfig.INSTANCE.preload();
@@ -78,6 +81,7 @@ public class QuickStats {
         ClientRegistry.registerKeyBinding(statsKey);
         MinecraftForge.EVENT_BUS.register(this);
         ClientCommandHandler.instance.registerCommand(new StatsCommand());
+        locraw = true;
         LOGGER.debug(instance.toString());        // please stop moaning at me intellij
         LOGGER.info("Complete! QuickStats loaded successfully.");
     }
@@ -95,7 +99,7 @@ public class QuickStats {
                 try {
                     Entity entity = GetEntity.get(0);
                     if (entity instanceof EntityPlayer) {
-                        new GUIStats(entity.getName());
+                        GuiInst.showGUI(entity.getName());
                     }
                 } catch (Exception ignored) {
                 }
@@ -128,11 +132,15 @@ public class QuickStats {
             }
         }
         if (GUIConfig.doPartyDetection) {
+            if (QuickStats.locraw) {
+                QuickStats.locraw = false;
+                LocInst.send();
+            }
             try {
                 if (GUIConfig.doPartyDetectionPLUS) {
                     if (event.message.getUnformattedText().contains("say") && getUsernameFromChat(event.message.getUnformattedText()).equals(mc.thePlayer.getName())) {
                         try {
-                            String unformatted = UTextComponent.Companion.stripFormatting(event.message.getUnformattedText());
+                            String unformatted = EnumChatFormatting.getTextWithoutFormattingCodes(event.message.getUnformattedText());
                             partySet = StringUtils.substringAfter(unformatted, "say ");
                             set = true;
                             if (partySet.contains("my name")) {
@@ -150,19 +158,19 @@ public class QuickStats {
                         }
                     }
                 }
-                if (event.message.getUnformattedText().contains(mc.thePlayer.getName())) {
-                    //System.out.println(event.message.getUnformattedText());
+                if (event.message.getUnformattedText().contains(mc.thePlayer.getName()) && LocrawUtil.lobby) {
                     if (!event.message.getUnformattedText().contains("lobby!")) {
                         String username = getUsernameFromChat(event.message.getUnformattedText());
                         if (!username.equalsIgnoreCase(mc.thePlayer.getName())) {
-                            new GUIStats(username);
+                            GuiInst.showGUI(username);
+                            return;
                         }
                     }
                 }
-                if (set && event.message.getUnformattedText().contains(partySet)) {
+                if (set && event.message.getUnformattedText().contains(partySet) && LocrawUtil.lobby) {
                     String username = getUsernameFromChat(event.message.getUnformattedText());
                     if (!username.equalsIgnoreCase(mc.thePlayer.getName())) {
-                        new GUIStats(username);
+                        GuiInst.showGUI(username);
                     }
                 }
             } catch (Exception e) {
@@ -175,13 +183,13 @@ public class QuickStats {
 
     public String getUsernameFromChat(String message) {
         try {
-            String unformatted = UTextComponent.Companion.stripFormatting(message);
+            String unformatted = EnumChatFormatting.getTextWithoutFormattingCodes(message);
             return unformatted.substring(unformatted.lastIndexOf("]") + 2, unformatted.lastIndexOf(":"));
         } catch (Exception e) {
             if (GUIConfig.debugMode) {
                 e.printStackTrace();
             }
-            return message;
+            return null;
         }
     }
 

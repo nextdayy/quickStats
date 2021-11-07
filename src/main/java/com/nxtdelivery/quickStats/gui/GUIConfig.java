@@ -45,16 +45,16 @@ public class GUIConfig extends Vigilant {
     public static boolean doSound = true;
     @Property(
             type = PropertyType.SWITCH, name = "Party Detection",
-            description = "Enable/Disable detection of your name being mentioned to trigger players' stats.\nUseful for BedWars parties.",
+            description = "Enable/Disable detection of your name being mentioned to trigger players' stats.\nUseful for BedWars parties.\n\u00A7eCurrently under development! Might cause lag if spammed!",
             category = "General", subcategory = "Parties"
     )
-    public static boolean doPartyDetection = true;
+    public static boolean doPartyDetection = false;
     @Property(
             type = PropertyType.SWITCH, name = "Party Detection++",
             description = "Enable/Disable detection of a phrase being said triggering stats.\nHave 'say <word or phrase>' in your chat message to set this.",
             category = "General", subcategory = "Parties"
     )
-    public static boolean doPartyDetectionPLUS = true;
+    public static boolean doPartyDetectionPLUS = false;
     @Property(
             type = PropertyType.SELECTOR, name = "Default Game",
             description = "Game to show stats for if nothing else is found.\nIf you want it to always show this stat, disable Automatic game detection.",
@@ -155,7 +155,7 @@ public class GUIConfig extends Vigilant {
     public static void testWin() {
         if (!test) {
             test = true;
-            new GUIStats("nxtdaydelivery");
+            QuickStats.GuiInst.showGUI("nxtdaydelivery");
         } else {
             test = false;
         }

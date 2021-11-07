@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import com.nxtdelivery.quickStats.QuickStats;
 import com.nxtdelivery.quickStats.gui.GUIConfig;
 import net.minecraft.client.Minecraft;
+import net.minecraft.stats.IStatStringFormat;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -14,9 +15,25 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class LocrawUtil {
     private static final Minecraft mc = Minecraft.getMinecraft();
     public static String gameType;
+    public static boolean lobby = false;
+
+    public LocrawUtil() {
+        register();
+    }
 
     @EventHandler()
     public void register() {
+        System.out.println("registering Locraw");
+        MinecraftForge.EVENT_BUS.register(this);
+    }
+
+    @EventHandler()
+    private void destroy() {
+        MinecraftForge.EVENT_BUS.unregister(this);
+    }
+
+    @EventHandler()
+    public void send() {
         MinecraftForge.EVENT_BUS.register(this);
         try {
             if (GUIConfig.autoGame) {
@@ -28,11 +45,6 @@ public class LocrawUtil {
             QuickStats.LOGGER
                     .error("couldn't sent locraw message. this usually occurs when being kicked from the server.");
         }
-    }
-
-    @EventHandler()
-    private void destroy() {
-        MinecraftForge.EVENT_BUS.unregister(this);
     }
 
 
@@ -48,9 +60,11 @@ public class LocrawUtil {
                 destroy();
                 try {
                     gameType = jsonObject.get("mode").toString();
+                    lobby = false;
                 } catch (Exception e) {
                     try {
                         gameType = jsonObject.get("gametype").toString();
+                        lobby = true;
                     } catch (Exception e1) { // catch if in limbo
                         gameType = "limbo";
                         return "limbo";

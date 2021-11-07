@@ -29,6 +29,7 @@ public class ApiRequest extends Thread {
     public boolean noUser = false;
     public boolean generalError = false;
     public boolean noAPI = false;
+    public boolean timeOut = false;
     public String uuid;
     public BufferedImage image;
     int startTime, endTime;
@@ -66,6 +67,7 @@ public class ApiRequest extends Thread {
             }
             mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
                     + "[QuickStats] an unexpected error occurred. Check logs for more info."));
+            generalError = true;
         }
         /* get head texture */
         try {
@@ -82,6 +84,9 @@ public class ApiRequest extends Thread {
 
         /* process request from Hypixel */
         try {
+            if (uuid == null) {
+                return;
+            }
             String url = "https://api.hypixel.net/player?key=" + GUIConfig.apiKey + "&uuid=" + uuid;
             if (GUIConfig.debugMode) {
                 QuickStats.LOGGER.info(url);
@@ -121,10 +126,13 @@ public class ApiRequest extends Thread {
                 } catch (NullPointerException e) {
                     rank = "non";
                 }
-                if (playerName.equals("Technoblade")) {      // Technoblade never dies
-                    formattedName = "\u00A7d[PIG\u00A7b+++\u00A7d] Technoblade";
-                } else {
-                    formattedName = getFormattedName(playerName, rank, rankColor);
+                try {
+                    if (playerName.equals("Technoblade")) {      // Technoblade never dies
+                        formattedName = "\u00A7d[PIG\u00A7b+++\u00A7d] Technoblade";
+                    } else {
+                        formattedName = getFormattedName(playerName, rank, rankColor);
+                    }
+                } catch (Exception ignored) {
                 }
 
                 rootStats = js2.get("stats").getAsJsonObject();
@@ -145,11 +153,20 @@ public class ApiRequest extends Thread {
                         + "[QuickStats] You haven't set an API key yet! Type /api new to get one, and the mod should grab it."));
                 noAPI = true;
             } else {
-                mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
-                        + "[QuickStats] failed to contact Hypixel API. This is usually due to an invalid API key."));
-                mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
-                        + "[QuickStats] On Hypixel, type /api new to get a new key and the mod should automatically grab it."));
-                generalError = true;
+                if (e.getMessage().contains("504 for URL")) {
+                    mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
+                            + "[QuickStats] failed to contact the Hypixel API. Request timed out!"));
+                    timeOut = true;
+                } else {
+                    mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
+                            + "[QuickStats] failed to contact Hypixel API. This is usually due to an invalid API key."));
+                    mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
+                            + "[QuickStats] On Hypixel, type /api new to get a new key and the mod should automatically grab it."));
+                    if (GUIConfig.debugMode) {
+                        e.printStackTrace();
+                    }
+                    generalError = true;
+                }
             }
         } catch (Exception e) {
             // QuickStats.LOGGER.error(e.getStackTrace().toString());

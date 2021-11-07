@@ -2,7 +2,6 @@ package com.nxtdelivery.quickStats.gui;
 
 import com.nxtdelivery.quickStats.QuickStats;
 import com.nxtdelivery.quickStats.api.ApiRequest;
-import com.nxtdelivery.quickStats.util.LocrawUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
@@ -20,7 +19,7 @@ public class GUIStats extends Gui {
     private static final Minecraft mc = Minecraft.getMinecraft();
     private final FontRenderer fr = mc.fontRendererObj;
     long systemTime = Minecraft.getSystemTime();
-    ScaledResolution resolution = new ScaledResolution(mc);
+    final ScaledResolution resolution = new ScaledResolution(mc);
     Integer height, width, top, bottom, middle, halfWidth, seed, pad;
     long frames, framesLeft, fifth, upperThreshold, lowerThreshold;
     Float fontScale, percentComplete;
@@ -28,10 +27,14 @@ public class GUIStats extends Gui {
     ApiRequest api;
     public static Integer guiScale;
 
-    public GUIStats(String user) {
+    public GUIStats() {
+        register();
+    }
+    public void showGUI(String user) {
         height = resolution.getScaledHeight();
         width = resolution.getScaledWidth();
         guiScale = mc.gameSettings.guiScale;
+        systemTime = Minecraft.getSystemTime();
         frames = 5 * 60;
         framesLeft = 7 * 60; // first number = delay before progress bar (def: 7)
         fifth = frames / 5;
@@ -50,7 +53,7 @@ public class GUIStats extends Gui {
                     pad = middle + 373; // text padding
                     break;
                 case 1: // SMALL
-                    middle = width - 130;
+                    middle = width + 1330;
                     top = 50;
                     bottom = 145;
                     halfWidth = 112;
@@ -58,7 +61,7 @@ public class GUIStats extends Gui {
                     pad = middle + 314; // text padding
                     break;
                 case 2: // NORMAL
-                    middle = width - 90; // position of window, smaller number = closer to edge
+                    middle = width + 420; // position of window, smaller number = closer to edge
                     top = 50; // top of window
                     bottom = 115; // bottom of window
                     halfWidth = 82; // width of window, larger number is larger window
@@ -66,7 +69,7 @@ public class GUIStats extends Gui {
                     pad = middle + 119; // text padding
                     break;
                 case 3: // LARGE
-                    middle = width - 90;
+                    middle = width + 110;
                     top = 50;
                     bottom = 115;
                     halfWidth = 85;
@@ -75,28 +78,27 @@ public class GUIStats extends Gui {
                     break;
             }
         }
-        this.run();
+        seed = (halfWidth * 2);
+        if (QuickStats.locraw) {
+            System.out.println("locraw needed!");
+            QuickStats.locraw = false;
+            QuickStats.LocInst.send();
+        }
+        api = new ApiRequest(username);
+        if (GUIConfig.doSound) {
+            mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
+        }
+        //System.out.println(middle + " " + top + " " + bottom + " "  + halfWidth + " "  + fontScale + " "  + pad);
+        this.register();
     }
 
     @EventHandler()
     public void delete() {
         MinecraftForge.EVENT_BUS.unregister(this);
     }
-
     @EventHandler()
-    public void run() {
+    public void register() {
         MinecraftForge.EVENT_BUS.register(this);
-        if (QuickStats.locraw) {
-            QuickStats.locraw = false;
-            LocrawUtil locrawUtil = new LocrawUtil();
-            locrawUtil.register();
-        }
-        api = new ApiRequest(username);
-        if (GUIConfig.doSound) {
-            mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
-        }
-
-
     }
 
     private static float clamp(float number) {
@@ -138,7 +140,6 @@ public class GUIStats extends Gui {
             pad = middle + 119;
         }
 
-        seed = (halfWidth * 2);
 
         int currentWidth = (int) (halfWidth * percentComplete);
         Gui.drawRect(middle - currentWidth, top, middle + currentWidth, bottom, GUIConfig.bgColor.getRGB());
@@ -170,7 +171,9 @@ public class GUIStats extends Gui {
             if (api.noAPI) {
                 title = "No valid API key!";
             }
-
+            if (api.timeOut) {
+                title = "Request timed out!";
+            }
 
             try {
                 if (api.image != null) {

@@ -91,13 +91,12 @@ public class StatsCommand implements ICommand {
                 case "testLoc":
                     sender.addChatMessage(new ChatComponentText(
                             EnumChatFormatting.DARK_GRAY + "[QuickStats] Testing locraw function..."));
-                    LocrawUtil locrawUtil = new LocrawUtil();
-                    locrawUtil.register();
+                    QuickStats.LocInst.send();
                     break;
                 case "test":
                     sender.addChatMessage(new ChatComponentText(
                             EnumChatFormatting.DARK_GRAY + "[QuickStats] Testing function..."));
-                    new GUIStats("nxtdaydelivery");
+                    QuickStats.GuiInst.showGUI("nxtdaydelivery");
                     break;
                 case "testEntity":
                     try {
@@ -113,7 +112,7 @@ public class StatsCommand implements ICommand {
                     }
                     break;
                 default:
-                    new GUIStats(args[0]);
+                    QuickStats.GuiInst.showGUI(args[0]);
                     break;
             }
         } catch (Exception e) {
