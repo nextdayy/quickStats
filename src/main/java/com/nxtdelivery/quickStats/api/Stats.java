@@ -25,7 +25,7 @@ public class Stats {
                 }
             } catch (Exception e) {
                 //if(GUIConfig.debugMode) {e.printStackTrace();}
-                System.out.println(GUIConfig.defaultGame);
+                QuickStats.LOGGER.debug("default game: " + GUIConfig.defaultGame);
                 switch (GUIConfig.defaultGame) {
                     case 0:
                         game = "BEDWARS";

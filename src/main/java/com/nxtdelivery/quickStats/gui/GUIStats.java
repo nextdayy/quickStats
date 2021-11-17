@@ -15,12 +15,15 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.opengl.GL11;
 
+import java.awt.*;
+
 public class GUIStats extends Gui {
     private static final Minecraft mc = Minecraft.getMinecraft();
     FontRenderer fr = mc.fontRendererObj;
     long systemTime = Minecraft.getSystemTime();
     Integer height, width, top, bottom, middle, halfWidth, seed, pad, padY, scaledX, scaledY, midX, midY;
     long frames, framesLeft, fifth, upperThreshold, lowerThreshold;
+    Color progColor, bgColor, textColor;
     Float fontScale, percentComplete;
     String username, title;
     ApiRequest api;
@@ -38,7 +41,6 @@ public class GUIStats extends Gui {
         scaledY = height / 100;
         midX = width / 2;
         midY = height / 2;
-        System.out.println(scaledX);
         guiScale = mc.gameSettings.guiScale;
         systemTime = Minecraft.getSystemTime();
         frames = 5 * 60;
@@ -48,30 +50,77 @@ public class GUIStats extends Gui {
         lowerThreshold = fifth;
         percentComplete = 0.0f;
         username = user;
+        int xOffset;
+        switch (GUIConfig.winPreset) {
+            case 0:
+                xOffset = 40;
+                top = 50;
+                bottom = 115;
+                break;
+            case 1:
+                xOffset = -40;
+                top = 50;
+                bottom = 115;
+                break;
+            case 2:
+                xOffset = 40;
+                top = 450;
+                bottom = 515;
+                break;
+            case 3:
+                xOffset = -40;
+                top = 450;
+                bottom = 515;
+                break;
+            default:        // no null pointer exceptions for me
+                xOffset = 40;
+                top = 50;
+                bottom = 116;
+                break;
+        }
         if (!GUIConfig.sizeEnabled) {
-            middle = midX + (scaledX * 40);
+            middle = midX + (scaledX * xOffset);
             fontScale = 0.8f;
-            top = 50;
-            bottom = 115;
             halfWidth = 82;
-            switch (guiScale) {         // TODO add window presets!
-                case 0: // AUTO scale
-                    middle = midX + (scaledX * 40);
+            seed = (halfWidth * 2);
+            pad = roundIntWithFloat(middle, 1.25f) - halfWidth - 10;
+            padY = roundIntWithFloat(top, 1.25f) + 26;
+            switch (guiScale) {         // TODO add color presets!
+                case 0: // AUTO scale, I have no idea why it is so different
                     top = 28;
-                    bottom = 72;
+                    bottom = 70;
                     halfWidth = 62;
                     fontScale = 0.75f;
+                    pad = 810;
+                    padY = 100;
                     break;
                 case 3: // LARGE
                     middle = midX + (scaledX * 37);
                     break;
             }
         }
-        seed = (halfWidth * 2);
-        float padF = middle * 1.25f;
-        pad = (int) padF - halfWidth - 10;
-        float padYF = top * 1.25f;
-        padY = (int) padYF + 26;
+        switch (GUIConfig.colorPreset) {
+            case 1:         // essential
+                this.progColor = new Color(14, 156, 91, 255);
+                this.bgColor = new Color(22, 22, 24, 255);
+                //GUIConfig.textColor = new Color(183, 185, 189, 255);
+                break;
+            case 2:         // red
+                this.progColor = new Color(149, 0, 0, 150);
+                this.bgColor = new Color(17, 17, 27, 200);
+                //GUIConfig.textColor = new Color(53, 0, 1, 255);
+                break;
+            case 3:         // PINKULU
+                this.progColor = new Color(247, 101, 163, 200);
+                this.bgColor = new Color(255, 164, 182, 100);
+                //GUIConfig.textColor = new Color(255, 164, 182, 255);
+                break;
+            default:
+                this.progColor = GUIConfig.progColor;
+                this.bgColor = GUIConfig.bgColor;
+                this.textColor = GUIConfig.textColor;
+
+        }
 
         if (QuickStats.locraw) {
             QuickStats.locraw = false;
@@ -81,7 +130,10 @@ public class GUIStats extends Gui {
         if (GUIConfig.doSound) {
             mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
         }
-        System.out.println(middle + " " + top + " " + bottom + " "  + halfWidth + " "  + fontScale + " "  + pad + "  if this is in production build then feel free to hit me");
+        /*if (GUIConfig.debugMode) {
+            System.out.println("SCALE=" + guiScale + " HEIGHT=" + height + " WIDTH=" + width + " SCALEDX=" + scaledX + " SCALEDY=" + scaledY);
+            System.out.println("MIDDLE=" + middle + " TOP=" + top + " BOTTOM=" + bottom + " WIDTH=" + halfWidth + " SCALE=" + fontScale + " PADX=" + pad + " PADY=" + padY + "  if this is in production build then feel free to hit me");
+        }*/
         this.register();
     }
 
@@ -105,6 +157,12 @@ public class GUIStats extends Gui {
         } else {
             return goal;
         }
+    }
+
+
+    private static int roundIntWithFloat(int number, float multiplier) {
+        float tempF = number * multiplier;
+        return (int) tempF;
     }
 
     @SubscribeEvent
@@ -131,15 +189,22 @@ public class GUIStats extends Gui {
             bottom = GUIConfig.winBottom;
             halfWidth = GUIConfig.winWidth;
             fontScale = 0.8f;
-            float padF = middle * 1.25f;
-            pad = (int) padF - halfWidth;
-            float padYF = top * 1.25f;
-            padY = (int) padYF + 25;
+            pad = roundIntWithFloat(middle, 1.25f) - halfWidth;
+            padY = roundIntWithFloat(top, 1.25f) + 26;
+            seed = halfWidth * 2;
+            this.bgColor = GUIConfig.bgColor;
+            this.textColor = GUIConfig.textColor;
+            this.progColor = GUIConfig.progColor;
+        }
+        if (GUIConfig.colorPreset == 0) {
+            this.progColor = GUIConfig.progColor;
+            this.bgColor = GUIConfig.bgColor;
+            this.textColor = GUIConfig.textColor;
         }
 
 
         int currentWidth = (int) (halfWidth * percentComplete);
-        Gui.drawRect(middle - currentWidth, top, middle + currentWidth, bottom, GUIConfig.bgColor.getRGB());
+        Gui.drawRect(middle - currentWidth, top, middle + currentWidth, bottom, this.bgColor.getRGB());
 
         if (percentComplete == 1.0F) {
             if (GUIConfig.test) {
@@ -149,11 +214,11 @@ public class GUIStats extends Gui {
             long current = framesLeft - lowerThreshold;
             float progress = 1F - clamp((float) current / (float) length);
             Gui.drawRect(middle - currentWidth, bottom - 2, (int) (middle - currentWidth + (seed * progress)), bottom,
-                    GUIConfig.progColor.getRGB()); // 128, 226, 126
+                    this.progColor.getRGB()); // 128, 226, 126
             if (guiScale == 0) {
                 GL11.glPushMatrix();
                 GL11.glScalef(fontScale, fontScale, fontScale); // shrink font
-                fontScale = 0.6f;
+                fontScale = 0.65f;
             }
             title = api.formattedName;
             if (api.formattedName == null) {
@@ -178,7 +243,11 @@ public class GUIStats extends Gui {
                     ResourceLocation location = mc.getTextureManager().getDynamicTextureLocation("quickstats/user", dynamic);
                     mc.getTextureManager().bindTexture(location);
                     GlStateManager.color(1F, 1F, 1F, 1F);
-                    drawModalRectWithCustomSizedTexture(middle - halfWidth + 3, top + 4, 0, 0, 14, 14, 14, 14);
+                    if (guiScale != 0) {
+                        drawModalRectWithCustomSizedTexture(middle - halfWidth + 3, top + 4, 0, 0, 14, 14, 14, 14);
+                    } else {
+                        drawModalRectWithCustomSizedTexture(roundIntWithFloat(middle - halfWidth + 3, 1.54f), top + 18, 0, 0, 14, 14, 14, 14);
+                    }
                 }
             } catch (Exception e) {
                 if (GUIConfig.debugMode) {
@@ -197,9 +266,9 @@ public class GUIStats extends Gui {
             }
             if (guiScale == 0) {
                 if (GUIConfig.textShadow) {
-                    fr.drawStringWithShadow(title, middle - halfWidth + 20, top + 8, -1);
+                    fr.drawStringWithShadow(title, roundIntWithFloat(middle - halfWidth + 20, 1.52f), top + 24, -1);
                 } else {
-                    fr.drawString(title, middle - halfWidth + 20, top + 8, -1);
+                    fr.drawString(title, roundIntWithFloat(middle - halfWidth + 20, 1.52f), top + 24, -1);
                 }
                 GL11.glScalef(fontScale, fontScale, fontScale);
             }
@@ -209,9 +278,9 @@ public class GUIStats extends Gui {
                     QuickStats.LOGGER.debug(api.result.get(i));
                     resultMsg = api.result.get(i);
                     if (GUIConfig.textShadow) {
-                        fr.drawStringWithShadow(resultMsg, pad, (10 * i) + padY, -1);
+                        fr.drawStringWithShadow(resultMsg, pad, (10 * i) + padY, this.textColor.getRGB());
                     } else {
-                        fr.drawString(resultMsg, pad, (10 * i) + padY, -1);
+                        fr.drawString(resultMsg, pad, (10 * i) + padY, this.textColor.getRGB());
                     }
                 }
             } catch (Exception e) {

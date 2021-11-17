@@ -156,7 +156,7 @@ public class GUIConfig extends Vigilant {
 
 
     @Property(
-            type = PropertyType.BUTTON, name = "Load Window",
+            type = PropertyType.BUTTON, name = "Open Window",
             description = "Toggle opening of the window so you can see what you are changing.\n\u00A7ePress the button again to close.",
             category = "Gui Settings", placeholder = "Open"
     )
@@ -203,6 +203,7 @@ public class GUIConfig extends Vigilant {
         }
         bgColor = new Color(27, 27, 27, 200);
         progColor = new Color(22, 33, 245, 140);
+        textColor = new Color(255,255,255,255);
     }
 
     @Property(
@@ -239,12 +240,12 @@ public class GUIConfig extends Vigilant {
             category = "Gui Settings", subcategory = "Size",
             min = 80, max = 1200
     )
-    public static int winMiddle = 90;
+    public static int winMiddle = 210;
 
 
     @Property(
             type = PropertyType.COLOR, name = "Background Color",
-            description = "Change the color of the background",
+            description = "Change the color of the background.",
             category = "Gui Settings", subcategory = "Colors",
             min = 1, max = 255
     )
@@ -256,6 +257,16 @@ public class GUIConfig extends Vigilant {
             min = 1, max = 255
     )
     public static Color progColor = new Color(22, 33, 245, 100);
+    @Property(
+            type = PropertyType.COLOR, name = "Text Color",
+            description = "Change the color of the text.",
+            category = "Gui Settings", subcategory = "Colors",
+            min = 1, max = 255, hidden = true       // TODO
+    )
+    public static Color textColor = new Color(255, 255, 255, 255);
+
+
+
     @Property(
             type = PropertyType.SWITCH, name = "Text Shadow",
             description = "Render the text with a shadow on the GUI.",
@@ -289,11 +300,18 @@ public class GUIConfig extends Vigilant {
     public static float GUITime = 7f;
     @Property(
             type = PropertyType.SELECTOR, name = "Window Preset",
-            description = "Set the position of the window according to a preset. \n\u00A7eExperimental!",
-            category = "Gui Settings", subcategory = "Colors",
+            description = "Set the position of the window according to a preset.",
+            category = "Gui Settings", subcategory = "Presets",
             options = {"Top Right", "Top Left", "Bottom Right", "Bottom Left"}
     )
     public static int winPreset = 0;
+    @Property(
+            type = PropertyType.SELECTOR, name = "Color Preset",
+            description = "Set the color scheme of the window according to a preset.\nIf you want to use your own colors, set this to default.",
+            category = "Gui Settings", subcategory = "Presets",
+            options = {"Default (Blue)", "Essential (Green)", "Gamer (Red)", "Pinkulu (Pink)"}
+    )
+    public static int colorPreset = 0;
 
 
     @Property(
@@ -309,7 +327,7 @@ public class GUIConfig extends Vigilant {
     private static final Minecraft mc = Minecraft.getMinecraft();
 
     public GUIConfig() {
-        super(new File("./config/quickStats.toml"), "\u00A71QuickStats (" + Reference.VERSION + ")");
+        super(new File("./config/quickStats.toml"), "\u00A7fQuickStats (" + Reference.VERSION + ")");
         initialize();
 
         addDependency("winWidth", "sizeEnabled");

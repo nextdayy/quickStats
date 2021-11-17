@@ -3,7 +3,9 @@
  *  optimize use of the reference class
  *  fixes for the text padding + the window position in general
  *  removed limits on the custom window
- *  added /qs <name> <gamemode>
+ *  added /qs <name> <gamemode> with human words
+ *  added window presets!
+ *  added color presets!
  *  bug fixes
  *  code cleanup
  */

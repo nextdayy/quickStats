@@ -12,10 +12,8 @@ import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.stats.Achievement;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.EnumChatFormatting;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -113,8 +111,38 @@ public class StatsCommand implements ICommand {
                     break;
                 default:
                     QuickStats.GuiInst.showGUI(args[0]);
-                    if(args.length == 2) {
-                        LocrawUtil.gameType = args[1];
+                    try {
+                        if (args.length == 2) {
+                            switch (args[1].toUpperCase()) {
+                                case "BEDWARS":
+                                case "BW":
+                                case "BEDWAR":
+                                    LocrawUtil.gameType = "BEDWARS";
+                                    break;
+                                case "SW":
+                                case "SKYWARS":
+                                case "SKYWAR":
+                                    LocrawUtil.gameType = "SKYWARS";
+                                    break;
+                                case "QC":
+                                case "QK":
+                                case "QUAKE":
+                                    LocrawUtil.gameType = "solo";
+                                    break;
+                                case "DUEL":
+                                case "DUELS":
+                                case "DL":
+                                    LocrawUtil.gameType = "DUELS";
+                                    break;
+                                default:
+                                    LocrawUtil.gameType = args[1].toUpperCase();
+                                    break;
+                            }
+                        }
+                    } catch (Exception e) {
+                        if (GUIConfig.debugMode) {
+                            e.printStackTrace();
+                        }
                     }
                     break;
             }

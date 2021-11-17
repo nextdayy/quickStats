@@ -22,7 +22,6 @@ public class LocrawUtil {
 
     @EventHandler()
     public void register() {
-        System.out.println("registering Locraw");
         MinecraftForge.EVENT_BUS.register(this);
     }
 
