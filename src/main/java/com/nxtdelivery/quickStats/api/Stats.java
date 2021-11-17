@@ -1,6 +1,7 @@
 package com.nxtdelivery.quickStats.api;
 
 import com.google.gson.JsonObject;
+import com.nxtdelivery.quickStats.QuickStats;
 import com.nxtdelivery.quickStats.gui.GUIConfig;
 
 import java.math.BigDecimal;
@@ -15,7 +16,9 @@ public class Stats {
         String kdString, wlString;
         try {
             try {
-                game = game.substring(1, game.length() - 1); // fix for too many speech marks
+                if(game.startsWith("\"")) {
+                    game = game.substring(1, game.length() - 1); // fix for too many speech marks
+                }
                 // System.out.println(game);
                 if(game.equals("MAIN")) {
                     throw new NullPointerException("default game");
@@ -200,6 +203,7 @@ public class Stats {
                     break;
 
                 default:
+                    QuickStats.LOGGER.warn("Unsupported game: " + game);
                     returnStats.add("you aren't in a supported game!");
                     returnStats.add("lots more games coming soon!");
                     break;

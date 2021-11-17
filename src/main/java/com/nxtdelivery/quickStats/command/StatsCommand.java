@@ -4,6 +4,7 @@ import com.nxtdelivery.quickStats.QuickStats;
 import com.nxtdelivery.quickStats.Reference;
 import com.nxtdelivery.quickStats.gui.GUIConfig;
 import com.nxtdelivery.quickStats.util.GetEntity;
+import com.nxtdelivery.quickStats.util.LocrawUtil;
 import com.nxtdelivery.quickStats.util.TickDelay;
 import com.nxtdelivery.quickStats.util.UpdateChecker;
 import net.minecraft.client.Minecraft;
@@ -73,10 +74,10 @@ public class StatsCommand implements ICommand {
                 case "reload":
                     QuickStats.LOGGER.info("Reloading config and version checker...");
                     sender.addChatMessage(new ChatComponentText(
-                            EnumChatFormatting.DARK_GRAY + "[QuickStats] Reloading!"));
+                            Reference.COLOR + "[QuickStats] Reloading!"));
                     GUIConfig.INSTANCE.initialize();
                     QuickStats.updateCheck = UpdateChecker.updateNeeded(Reference.VERSION);
-                    sender.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
+                    sender.addChatMessage(new ChatComponentText(Reference.COLOR
                             + "[QuickStats] Reloaded! Re-log and check logs for more information."));
                     Minecraft.getMinecraft().thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
                     break;
@@ -85,39 +86,42 @@ public class StatsCommand implements ICommand {
                     GUIConfig.INSTANCE.markDirty();
                     GUIConfig.INSTANCE.writeData();
                     sender.addChatMessage(new ChatComponentText(
-                            EnumChatFormatting.DARK_GRAY + ("[QuickStats] set your API key as: " + args[1] + ".")));
+                            Reference.COLOR + ("[QuickStats] set your API key as: " + args[1] + ".")));
                     break;
                 case "testLoc":
                     sender.addChatMessage(new ChatComponentText(
-                            EnumChatFormatting.DARK_GRAY + "[QuickStats] Testing locraw function..."));
+                            Reference.COLOR + "[QuickStats] Testing locraw function..."));
                     QuickStats.LocInst.send();
                     break;
                 case "test":
                     sender.addChatMessage(new ChatComponentText(
-                            EnumChatFormatting.DARK_GRAY + "[QuickStats] Testing function..."));
+                            Reference.COLOR + "[QuickStats] Testing function..."));
                     QuickStats.GuiInst.showGUI("nxtdaydelivery");
                     break;
                 case "testEntity":
                     try {
                         sender.addChatMessage(new ChatComponentText(
-                                EnumChatFormatting.DARK_GRAY + "[QuickStats] Testing getEntity function..."));
+                                Reference.COLOR + "[QuickStats] Testing getEntity function..."));
                         QuickStats.LOGGER.info(GetEntity.get(0).getName());
                         sender.addChatMessage(new ChatComponentText(
-                                EnumChatFormatting.DARK_GRAY + "[QuickStats] entity = " + GetEntity.get(0).getName()));
+                                Reference.COLOR + "[QuickStats] entity = " + GetEntity.get(0).getName()));
                     } catch (Exception e) {
                         QuickStats.LOGGER.info("entity = null");
                         sender.addChatMessage(new ChatComponentText(
-                                EnumChatFormatting.DARK_GRAY + "[QuickStats] entity = null"));
+                                Reference.COLOR + "[QuickStats] entity = null"));
                     }
                     break;
                 default:
                     QuickStats.GuiInst.showGUI(args[0]);
+                    if(args.length == 2) {
+                        LocrawUtil.gameType = args[1];
+                    }
                     break;
             }
         } catch (Exception e) {
-            sender.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
+            sender.addChatMessage(new ChatComponentText(Reference.COLOR
                     + "[QuickStats] Command menu (mod version " + Reference.VERSION + ")"));
-            sender.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
+            sender.addChatMessage(new ChatComponentText(Reference.COLOR
                     + "[QuickStats] Command usage: /quickstats <name>, /quickstats configure, /quickstats reload, /quickstats api <api key>"));
         }
     }

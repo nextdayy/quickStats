@@ -45,6 +45,12 @@ public class GUIConfig extends Vigilant {
     )
     public static boolean doSound = true;
     @Property(
+            type = PropertyType.SWITCH, name = "Allow On Other Servers",
+            description = "Enable/Disable player detection on servers other than Hypixel.\nPlease note that it will only show only the default game.",
+            category = "General", subcategory = "General"
+    )
+    public static boolean otherServer = true;
+    @Property(
             type = PropertyType.SWITCH, name = "Party Detection",
             description = "Enable/Disable detection of your name being mentioned to trigger players' stats.\n\u00A7eUseful for BedWars parties.",
             category = "General", subcategory = "Parties"
@@ -116,7 +122,7 @@ public class GUIConfig extends Vigilant {
     @Property(
             type = PropertyType.BUTTON, name = "Reset Defaults",
             description = "Reset all values to their defaults.\n \u00A7cForcibly restarts your game!",
-            category = "Support", subcategory = "General"
+            category = "Support", subcategory = "General", placeholder = "Reset"
     )
     public static void reset() {
         mc.thePlayer.closeScreen();         //TODO
@@ -152,7 +158,7 @@ public class GUIConfig extends Vigilant {
     @Property(
             type = PropertyType.BUTTON, name = "Load Window",
             description = "Toggle opening of the window so you can see what you are changing.\n\u00A7ePress the button again to close.",
-            category = "Gui Settings"
+            category = "Gui Settings", placeholder = "Open"
     )
     public static void testWin() {
         if (!test) {
@@ -166,7 +172,7 @@ public class GUIConfig extends Vigilant {
     @Property(
             type = PropertyType.BUTTON, name = "Reset Window",
             description = "Reset the window to the default values for your current GUI scale.\nYou might need to reopen the GUI and\\or restart your game for it to update.",
-            category = "Gui Settings"
+            category = "Gui Settings", placeholder = "Reset"
     )
     public static void resetGUI() {
         switch (mc.gameSettings.guiScale) {
@@ -201,7 +207,7 @@ public class GUIConfig extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH, name = "Custom Window",
-            description = "Enable/Disable changing of the window size and position.\nPlease note this is currently is under development and may behave unexpectedly.",
+            description = "Enable/Disable changing of the window size and position.\nPlease note this is entirely custom, and might behave unexpectedly.",
             category = "Gui Settings", subcategory = "Size"
     )
     public static boolean sizeEnabled = false;
@@ -217,21 +223,21 @@ public class GUIConfig extends Vigilant {
             type = PropertyType.SLIDER, name = "Window Top",
             description = "Change the position of the top of the window.",
             category = "Gui Settings", subcategory = "Size",
-            min = 5, max = 400
+            min = 5, max = 460
     )
     public static int winTop = 50;
     @Property(
             type = PropertyType.SLIDER, name = "Window Bottom",
             description = "Change the position of the bottom of the window.",
             category = "Gui Settings", subcategory = "Size",
-            min = 50, max = 550
+            min = 50, max = 530
     )
     public static int winBottom = 115;
     @Property(
             type = PropertyType.SLIDER, name = "Window Position",
             description = "Change the position of the window.",
             category = "Gui Settings", subcategory = "Size",
-            min = -350, max = 450
+            min = 80, max = 1200
     )
     public static int winMiddle = 90;
 
@@ -281,6 +287,13 @@ public class GUIConfig extends Vigilant {
             minF = 3f, maxF = 10f
     )
     public static float GUITime = 7f;
+    @Property(
+            type = PropertyType.SELECTOR, name = "Window Preset",
+            description = "Set the position of the window according to a preset. \n\u00A7eExperimental!",
+            category = "Gui Settings", subcategory = "Colors",
+            options = {"Top Right", "Top Left", "Bottom Right", "Bottom Left"}
+    )
+    public static int winPreset = 0;
 
 
     @Property(
@@ -296,7 +309,7 @@ public class GUIConfig extends Vigilant {
     private static final Minecraft mc = Minecraft.getMinecraft();
 
     public GUIConfig() {
-        super(new File("./config/quickStats.toml"), "QuickStats (" + Reference.VERSION + ")");
+        super(new File("./config/quickStats.toml"), "\u00A71QuickStats (" + Reference.VERSION + ")");
         initialize();
 
         addDependency("winWidth", "sizeEnabled");

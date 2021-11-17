@@ -19,8 +19,7 @@ public class GUIStats extends Gui {
     private static final Minecraft mc = Minecraft.getMinecraft();
     FontRenderer fr = mc.fontRendererObj;
     long systemTime = Minecraft.getSystemTime();
-    final ScaledResolution resolution = new ScaledResolution(mc);
-    Integer height, width, top, bottom, middle, halfWidth, seed, pad;
+    Integer height, width, top, bottom, middle, halfWidth, seed, pad, padY, scaledX, scaledY, midX, midY;
     long frames, framesLeft, fifth, upperThreshold, lowerThreshold;
     Float fontScale, percentComplete;
     String username, title;
@@ -33,8 +32,13 @@ public class GUIStats extends Gui {
 
     public void showGUI(String user) {
         fr = mc.fontRendererObj;
-        height = resolution.getScaledHeight();
-        width = resolution.getScaledWidth();
+        height = new ScaledResolution(mc).getScaledHeight();
+        width = new ScaledResolution(mc).getScaledWidth();
+        scaledX = width / 100;
+        scaledY = height / 100;
+        midX = width / 2;
+        midY = height / 2;
+        System.out.println(scaledX);
         guiScale = mc.gameSettings.guiScale;
         systemTime = Minecraft.getSystemTime();
         frames = 5 * 60;
@@ -45,42 +49,30 @@ public class GUIStats extends Gui {
         percentComplete = 0.0f;
         username = user;
         if (!GUIConfig.sizeEnabled) {
-            switch (guiScale) {
+            middle = midX + (scaledX * 40);
+            fontScale = 0.8f;
+            top = 50;
+            bottom = 115;
+            halfWidth = 82;
+            switch (guiScale) {         // TODO add window presets!
                 case 0: // AUTO scale
-                    middle = width - 67;
+                    middle = midX + (scaledX * 40);
                     top = 28;
                     bottom = 72;
                     halfWidth = 62;
                     fontScale = 0.75f;
-                    pad = middle + 373; // text padding
-                    break;
-                case 1: // SMALL
-                    middle = width + 1330;
-                    top = 50;
-                    bottom = 145;
-                    halfWidth = 112;
-                    fontScale = 0.8f;
-                    pad = middle + 314; // text padding
-                    break;
-                case 2: // NORMAL
-                    middle = width + 420; // position of window, smaller number = closer to edge
-                    top = 50; // top of window
-                    bottom = 115; // bottom of window
-                    halfWidth = 82; // width of window, larger number is larger window
-                    fontScale = 0.8f; // font size
-                    pad = middle + 119; // text padding
                     break;
                 case 3: // LARGE
-                    middle = width + 110;
-                    top = 50;
-                    bottom = 115;
-                    halfWidth = 85;
-                    fontScale = 0.8f;
-                    pad = middle + 35; // text padding
+                    middle = midX + (scaledX * 37);
                     break;
             }
         }
         seed = (halfWidth * 2);
+        float padF = middle * 1.25f;
+        pad = (int) padF - halfWidth - 10;
+        float padYF = top * 1.25f;
+        padY = (int) padYF + 26;
+
         if (QuickStats.locraw) {
             QuickStats.locraw = false;
             QuickStats.LocInst.send();
@@ -89,7 +81,7 @@ public class GUIStats extends Gui {
         if (GUIConfig.doSound) {
             mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
         }
-        //System.out.println(middle + " " + top + " " + bottom + " "  + halfWidth + " "  + fontScale + " "  + pad);
+        System.out.println(middle + " " + top + " " + bottom + " "  + halfWidth + " "  + fontScale + " "  + pad + "  if this is in production build then feel free to hit me");
         this.register();
     }
 
@@ -139,7 +131,10 @@ public class GUIStats extends Gui {
             bottom = GUIConfig.winBottom;
             halfWidth = GUIConfig.winWidth;
             fontScale = 0.8f;
-            pad = middle + 119;
+            float padF = middle * 1.25f;
+            pad = (int) padF - halfWidth;
+            float padYF = top * 1.25f;
+            padY = (int) padYF + 25;
         }
 
 
@@ -202,9 +197,9 @@ public class GUIStats extends Gui {
             }
             if (guiScale == 0) {
                 if (GUIConfig.textShadow) {
-                    fr.drawStringWithShadow(title, 521, 43, -1);
+                    fr.drawStringWithShadow(title, middle - halfWidth + 20, top + 8, -1);
                 } else {
-                    fr.drawString(title, 551 - fr.getStringWidth(title) / 2, 43, -1);
+                    fr.drawString(title, middle - halfWidth + 20, top + 8, -1);
                 }
                 GL11.glScalef(fontScale, fontScale, fontScale);
             }
@@ -214,10 +209,9 @@ public class GUIStats extends Gui {
                     QuickStats.LOGGER.debug(api.result.get(i));
                     resultMsg = api.result.get(i);
                     if (GUIConfig.textShadow) {
-                        fr.drawStringWithShadow(resultMsg, pad, (10 * i) + top + 40, -1);
+                        fr.drawStringWithShadow(resultMsg, pad, (10 * i) + padY, -1);
                     } else {
-                        //int pad1 = (int) ((int) (width - halfWidth +2) * 1.25);
-                        fr.drawString(resultMsg, pad, (10 * i) + top + 40, -1);
+                        fr.drawString(resultMsg, pad, (10 * i) + padY, -1);
                     }
                 }
             } catch (Exception e) {

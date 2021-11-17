@@ -1,8 +1,9 @@
-/* Changelog v1.5.1
- *  cleanup getEntity
- *  fix the party utility
- *  added window time
- *  major rewrite of how the system works to improve performance
+/* Changelog v1.5.6
+ *  fix the mod working (or rather not working) on other servers
+ *  optimize use of the reference class
+ *  fixes for the text padding + the window position in general
+ *  removed limits on the custom window
+ *  added /qs <name> <gamemode>
  *  bug fixes
  *  code cleanup
  */
@@ -49,13 +50,14 @@ public class QuickStats {
     public static QuickStats instance;
     private static final Minecraft mc = Minecraft.getMinecraft();
     private KeyBinding statsKey;
-    public static final Logger LOGGER = LogManager.getLogger("QuickStats");
+    public static final Logger LOGGER = LogManager.getLogger(Reference.NAME);
     public static boolean updateCheck;
     public static boolean betaFlag = true;
     public static boolean locraw = false;
     public static boolean corrupt = false;
     public static LocrawUtil LocInst;
     public static GUIStats GuiInst;
+    public static boolean onHypixel = false;
     boolean set = false;
     String partySet;
 
@@ -89,20 +91,22 @@ public class QuickStats {
 
     @SubscribeEvent
     public void onKeyPress(InputEvent.KeyInputEvent event) {
-        if (Keyboard.getEventKey() == statsKey.getKeyCode() && GUIConfig.modEnabled) {
-            if (GUIConfig.key != statsKey.getKeyCode()) {                // will write new key code if the player changed it in settings
-                LOGGER.warn("Key code from config (" + GUIConfig.key + ") differs to key code just used! (" + statsKey.getKeyCode() + ") writing new to config file...");
-                GUIConfig.key = Keyboard.getEventKey();
-                GUIConfig.INSTANCE.markDirty();
-                GUIConfig.INSTANCE.writeData();
-            }
-            if (Keyboard.getEventKeyState()) {
-                try {
-                    Entity entity = GetEntity.get(0);
-                    if (entity instanceof EntityPlayer) {
-                        GuiInst.showGUI(entity.getName());
+        if(onHypixel || GUIConfig.otherServer) {
+            if (Keyboard.getEventKey() == statsKey.getKeyCode() && GUIConfig.modEnabled) {
+                if (GUIConfig.key != statsKey.getKeyCode()) {                // will write new key code if the player changed it in settings
+                    LOGGER.warn("Key code from config (" + GUIConfig.key + ") differs to key code just used! (" + statsKey.getKeyCode() + ") writing new to config file...");
+                    GUIConfig.key = Keyboard.getEventKey();
+                    GUIConfig.INSTANCE.markDirty();
+                    GUIConfig.INSTANCE.writeData();
+                }
+                if (Keyboard.getEventKeyState()) {
+                    try {
+                        Entity entity = GetEntity.get(0);
+                        if (entity instanceof EntityPlayer) {
+                            GuiInst.showGUI(entity.getName());
+                        }
+                    } catch (Exception ignored) {
                     }
-                } catch (Exception ignored) {
                 }
             }
         }
@@ -111,76 +115,77 @@ public class QuickStats {
     @SubscribeEvent
     public void onChatReceive(ClientChatReceivedEvent event) {
         // System.out.println(event.message.getUnformattedText());
-        if (GUIConfig.autoGetAPI) {
-            try {
-                if (event.message.getUnformattedText().contains("Your new API key is")) {
-                    String apiMessage = event.message.getUnformattedText();
-                    String apiKey = apiMessage.substring(20);
-                    //System.out.println(apiKey);
-                    LOGGER.info("got API key from message: " + apiKey + ". writing and reloading config...");
-                    GUIConfig.apiKey = apiKey;
-                    GUIConfig.INSTANCE.markDirty();
-                    GUIConfig.INSTANCE.writeData();
-                    new TickDelay(() -> mc.thePlayer.addChatMessage(new ChatComponentText(
-                            EnumChatFormatting.DARK_GRAY + "[QuickStats] Grabbed and set your API key. The mod is now ready to use!")),
-                            5);
-                    mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
-                }
-            } catch (Exception e) {
-                if (GUIConfig.debugMode) {
-                    e.printStackTrace();
+        if (onHypixel) {
+            if (GUIConfig.autoGetAPI) {
+                try {
+                    if (event.message.getUnformattedText().contains("Your new API key is")) {
+                        String apiMessage = event.message.getUnformattedText();
+                        String apiKey = apiMessage.substring(20);
+                        //System.out.println(apiKey);
+                        LOGGER.info("got API key from message: " + apiKey + ". writing and reloading config...");
+                        GUIConfig.apiKey = apiKey;
+                        GUIConfig.INSTANCE.markDirty();
+                        GUIConfig.INSTANCE.writeData();
+                        new TickDelay(() -> mc.thePlayer.addChatMessage(new ChatComponentText(
+                                Reference.COLOR + "[QuickStats] Grabbed and set your API key. The mod is now ready to use!")),
+                                5);
+                        mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
+                    }
+                } catch (Exception e) {
+                    if (GUIConfig.debugMode) {
+                        e.printStackTrace();
+                    }
                 }
             }
-        }
-        if (GUIConfig.doPartyDetection) {
-            if (QuickStats.locraw) {
-                QuickStats.locraw = false;
-                LocInst.send();
-            }
-            try {
-                if (event.message.getUnformattedText().contains("Party ")) {
-                    return;
+            if (GUIConfig.doPartyDetection) {
+                if (QuickStats.locraw) {
+                    QuickStats.locraw = false;
+                    LocInst.send();
                 }
-                if (GUIConfig.doPartyDetectionPLUS) {
-                    if (event.message.getUnformattedText().contains("say") && getUsernameFromChat(event.message.getUnformattedText()).equals(mc.thePlayer.getName())) {
-                        try {
-                            String unformatted = EnumChatFormatting.getTextWithoutFormattingCodes(event.message.getUnformattedText());
-                            partySet = StringUtils.substringAfter(unformatted, "say ");
-                            set = true;
-                            if (partySet.contains("my name")) {
-                                partySet = null;
-                                set = false;
+                try {
+                    if (event.message.getUnformattedText().contains("Party ")) {
+                        return;
+                    }
+                    if (GUIConfig.doPartyDetectionPLUS) {
+                        if (event.message.getUnformattedText().contains("say") && getUsernameFromChat(event.message.getUnformattedText()).equals(mc.thePlayer.getName())) {
+                            try {
+                                String unformatted = EnumChatFormatting.getTextWithoutFormattingCodes(event.message.getUnformattedText());
+                                partySet = StringUtils.substringAfter(unformatted, "say ");
+                                set = true;
+                                if (partySet.contains("my name")) {
+                                    partySet = null;
+                                    set = false;
+                                }
+                                if (GUIConfig.debugMode) {
+                                    LOGGER.info(partySet);
+                                }
+                            } catch (Exception e) {
+                                if (GUIConfig.debugMode) {
+                                    e.printStackTrace();
+                                    set = false;
+                                }
                             }
-                            if (GUIConfig.debugMode) {
-                                LOGGER.info(partySet);
-                            }
-                        } catch (Exception e) {
-                            if (GUIConfig.debugMode) {
-                                e.printStackTrace();
-                                set = false;
+                        }
+                        if (set && event.message.getUnformattedText().contains(partySet) && LocrawUtil.lobby) {
+                            String username = getUsernameFromChat(event.message.getUnformattedText());
+                            if (!username.equalsIgnoreCase(mc.thePlayer.getName())) {
+                                GuiInst.showGUI(username);
+                                return;
                             }
                         }
                     }
-                    if (set && event.message.getUnformattedText().contains(partySet) && LocrawUtil.lobby) {
-                        String username = getUsernameFromChat(event.message.getUnformattedText());
-                        if (!username.equalsIgnoreCase(mc.thePlayer.getName())) {
-                            GuiInst.showGUI(username);
-                            return;
+                    if (event.message.getUnformattedText().contains(mc.thePlayer.getName()) && LocrawUtil.lobby) {
+                        if (!event.message.getUnformattedText().contains("lobby!")) {
+                            String username = getUsernameFromChat(event.message.getUnformattedText());
+                            if (!username.equalsIgnoreCase(mc.thePlayer.getName())) {
+                                GuiInst.showGUI(username);
+                            }
                         }
                     }
-                }
-                if (event.message.getUnformattedText().contains(mc.thePlayer.getName()) && LocrawUtil.lobby) {
-                    if (!event.message.getUnformattedText().contains("lobby!")) {
-                        String username = getUsernameFromChat(event.message.getUnformattedText());
-                        if (!username.equalsIgnoreCase(mc.thePlayer.getName())) {
-                            GuiInst.showGUI(username);
-                            return;
-                        }
+                } catch (Exception e) {
+                    if (GUIConfig.debugMode) {
+                        //e.printStackTrace();
                     }
-                }
-            } catch (Exception e) {
-                if (GUIConfig.debugMode) {
-                    //e.printStackTrace();
                 }
             }
         }
@@ -203,7 +208,11 @@ public class QuickStats {
     public void onWorldLoad(WorldEvent.Load event) {
         try {
             if (mc.getCurrentServerData().serverIP.contains("hypixel")) {
+                if (GUIConfig.debugMode) { LOGGER.info("on Hypixel!"); }
                 locraw = true;
+                onHypixel = true;
+            } else {
+                onHypixel = false;
             }
         } catch (Exception e) {
             // if(GUIConfig.debugMode) {e.printStackTrace();}
@@ -236,7 +245,7 @@ public class QuickStats {
         try {
             mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
             for (String message : messages) {
-                mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY + message));
+                mc.thePlayer.addChatMessage(new ChatComponentText(Reference.COLOR + message));
             }
         } catch (NullPointerException e) {
             if (GUIConfig.debugMode) {
@@ -251,18 +260,18 @@ public class QuickStats {
             IChatComponent comp = new ChatComponentText("Click here to update it!");
             ChatStyle style = new ChatStyle().setChatClickEvent(new ClickEvent(Action.OPEN_URL, Reference.URL));
             style.setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    new ChatComponentText(EnumChatFormatting.DARK_GRAY + Reference.URL)));
-            style.setColor(EnumChatFormatting.DARK_GRAY);
+                    new ChatComponentText(Reference.COLOR + Reference.URL)));
+            style.setColor(Reference.COLOR);
             style.setUnderlined(true);
             comp.setChatStyle(style);
             mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
             mc.thePlayer.addChatMessage(new ChatComponentText(
-                    EnumChatFormatting.DARK_GRAY + "--------------------------------------"));
-            mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
-                    + ("A newer version of QuickStats is available! (" + UpdateChecker.latestVersion + ")")));
+                    Reference.COLOR + "--------------------------------------"));
+            mc.thePlayer.addChatMessage(new ChatComponentText(Reference.COLOR
+                    + ("A newer version of " + Reference.NAME + " is available! (" + UpdateChecker.latestVersion + ")")));
             mc.thePlayer.addChatMessage(comp);
             mc.thePlayer.addChatMessage(new ChatComponentText(
-                    EnumChatFormatting.DARK_GRAY + "--------------------------------------"));
+                    Reference.COLOR + "--------------------------------------"));
         } catch (NullPointerException e) {
             LOGGER.fatal(e);
             LOGGER.error("skipping update message, bad world return!");
