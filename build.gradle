@@ -111,5 +111,9 @@ shadowJar {
     duplicatesStrategy DuplicatesStrategy.EXCLUDE
 }
 
-
+//reobf { shadowJar { mappingType = "SEARGE" } }
+//tasks.reobfShadowJar.mustRunAfter shadowJar
+//afterEvaluate {
+//    build.dependsOn reobfShadowJar
+//}
 jar.dependsOn shadowJar

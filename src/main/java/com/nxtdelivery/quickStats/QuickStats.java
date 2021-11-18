@@ -4,8 +4,10 @@
  *  fixes for the text padding + the window position in general
  *  removed limits on the custom window
  *  added /qs <name> <gamemode> with human words
+ *  added bolding of party detection
  *  added window presets!
  *  added color presets!
+ *  added window speed modification
  *  bug fixes
  *  code cleanup
  */
@@ -171,6 +173,10 @@ public class QuickStats {
                         if (set && event.message.getUnformattedText().contains(partySet) && LocrawUtil.lobby) {
                             String username = getUsernameFromChat(event.message.getUnformattedText());
                             if (!username.equalsIgnoreCase(mc.thePlayer.getName())) {
+                                event.setCanceled(true);
+                                StringBuilder sb = new StringBuilder(event.message.getUnformattedText());
+                                sb.insert(event.message.getUnformattedText().indexOf(partySet), "\u00A7l");
+                                mc.thePlayer.addChatMessage(new ChatComponentText(sb.toString()));
                                 GuiInst.showGUI(username);
                                 return;
                             }
@@ -180,6 +186,10 @@ public class QuickStats {
                         if (!event.message.getUnformattedText().contains("lobby!")) {
                             String username = getUsernameFromChat(event.message.getUnformattedText());
                             if (!username.equalsIgnoreCase(mc.thePlayer.getName())) {
+                                event.setCanceled(true);
+                                StringBuilder sb = new StringBuilder(event.message.getUnformattedText());
+                                sb.insert(event.message.getUnformattedText().indexOf(mc.thePlayer.getName()), "\u00A7l");
+                                mc.thePlayer.addChatMessage(new ChatComponentText(sb.toString()));
                                 GuiInst.showGUI(username);
                             }
                         }
@@ -226,8 +236,8 @@ public class QuickStats {
         if (Reference.VERSION.contains("beta") && betaFlag) {
             try {
                 new TickDelay(() -> sendMessages("",
-                        "[QuickStats] Beta build has been detected (ver. " + Reference.VERSION + ")",
-                        "[QuickStats] Note that some features might be unstable! Use at your own risk!"), 20);
+                        "Beta build has been detected (ver. " + Reference.VERSION + ")",
+                        "Note that some features might be unstable! Use at your own risk!"), 20);
                 betaFlag = false;
                 return;
             } catch (NullPointerException e) {
@@ -237,17 +247,17 @@ public class QuickStats {
         }
         if (corrupt) {
             new TickDelay(() -> sendMessages("",
-                    "[QuickStats] An error occurred while trying to read your config file. You will have to reset it.",
-                    "[QuickStats] If you just reset your configuration file, ignore this message."), 20);
+                    "An error occurred while trying to read your config file. You will have to reset it.",
+                    "If you just reset your configuration file, ignore this message."), 20);
             corrupt = false;
         }
     }
 
-    private void sendMessages(String... messages) {
+    public static void sendMessages(String... messages) {
         try {
             mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
             for (String message : messages) {
-                mc.thePlayer.addChatMessage(new ChatComponentText(Reference.COLOR + message));
+                mc.thePlayer.addChatMessage(new ChatComponentText(Reference.COLOR + "[" + Reference.NAME + "] " + message));
             }
         } catch (NullPointerException e) {
             if (GUIConfig.debugMode) {

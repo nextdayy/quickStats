@@ -48,9 +48,9 @@ public class Stats {
                 case "SKYWARS":
                     try {
                         JsonObject swStats = playerStats.get("SkyWars").getAsJsonObject();
-                        returnStats.add("Level: " + swStats.get("levelFormatted").getAsString() + "\u00A7f    Mode: \u00A75"
+                        returnStats.add("Level: " + swStats.get("levelFormatted").getAsString() + "\u00A7r    Mode: \u00A75"
                                 + "SkyWars");
-                        returnStats.add("Heads: \u00A75" + formatInt(swStats.get("heads").getAsInt()) + "\u00A7f     Coins: \u00A76"
+                        returnStats.add("Heads: \u00A75" + formatInt(swStats.get("heads").getAsInt()) + "\u00A7r     Coins: \u00A76"
                                 + formatInt(swStats.get("coins").getAsInt()));
                         returnStats.add("Kills: " + formatInt(acStats.get("skywars_kills_solo").getAsInt() + acStats.get("skywars_kills_team").getAsInt()) + "     Deaths: "
                                 + formatInt(swStats.get("losses").getAsInt()));
@@ -84,9 +84,9 @@ public class Stats {
                     try {
                         JsonObject bwStats = playerStats.get("Bedwars").getAsJsonObject();
                         returnStats.add("Level: \u00A79" + acStats.get("bedwars_level").getAsString() + "✫"
-                                + "\u00A7f       Game: \u00A72BedWars");
+                                + "\u00A7r       Game: \u00A72BedWars");
                         returnStats.add("Wins: \u00A75" + formatInt(acStats.get("bedwars_wins").getAsInt())
-                                + "\u00A7f      Coins: \u00A76" + formatInt(bwStats.get("coins").getAsInt()));
+                                + "\u00A7r      Coins: \u00A76" + formatInt(bwStats.get("coins").getAsInt()));
                         returnStats.add("Kills: " + formatInt(bwStats.get("kills_bedwars").getAsInt()) + "     Deaths: "
                                 + formatInt(bwStats.get("deaths_bedwars").getAsInt()));
                         returnStats.add("Final Kills: " + formatInt(bwStats.get("final_kills_bedwars").getAsInt())
@@ -185,8 +185,8 @@ public class Stats {
                         JsonObject qkStats = playerStats.get("Quake").getAsJsonObject();
                         double lvl = getLevel(ApiRequest.exp);
                         int lvlInt = (int) Math.round(lvl);
-                        returnStats.add("Level: \u00A74" + lvlInt + "\u00A7f       Mode: \u00A75 Quakecraft");
-                        returnStats.add("Godlikes: \u00A75" + acStats.get("quake_godlikes").getAsString() + "\u00A7f     Coins: \u00A76"
+                        returnStats.add("Level: \u00A74" + lvlInt + "\u00A7r       Mode: \u00A75 Quakecraft");
+                        returnStats.add("Godlikes: \u00A75" + acStats.get("quake_godlikes").getAsString() + "\u00A7r     Coins: \u00A76"
                                 + formatInt(qkStats.get("coins").getAsInt()));
                         returnStats.add("Kills: " + formatInt(qkStats.get("kills").getAsInt()) + "     Deaths: "
                                 + formatInt(qkStats.get("deaths").getAsInt()));
@@ -225,15 +225,15 @@ public class Stats {
         BigDecimal kd = new BigDecimal(ratio).setScale(2, RoundingMode.HALF_UP);
         if (Objects.equals(type, "wins")) {
             if (kd.floatValue() > 0.4f) {
-                result = "\u00A72" + kd + "\u00A7f";
+                result = "\u00A72" + kd + "\u00A7r";
             } else {
-                result = "\u00A74" + kd + "\u00A7f";
+                result = "\u00A74" + kd + "\u00A7r";
             }
         } else {
             if (kd.floatValue() > 1f) {
-                result = "\u00A72" + kd + "\u00A7f";
+                result = "\u00A72" + kd + "\u00A7r";
             } else {
-                result = "\u00A74" + kd + "\u00A7f";
+                result = "\u00A74" + kd + "\u00A7r";
             }
         }
         return result;
@@ -246,11 +246,11 @@ public class Stats {
         try {
             JsonObject bwStats = playerStats.get("Bedwars").getAsJsonObject();
             String kdString, wlString;
-            result.add("Level: \u00A79" + acStats.get("bedwars_level").getAsString() + "✫" + "\u00A7f    Mode: \u00A72"
+            result.add("Level: \u00A79" + acStats.get("bedwars_level").getAsString() + "✫" + "\u00A7r    Mode: \u00A72"
                     + gamemodeFormatted);
             if (GUIConfig.compactMode) {
                 result.add("W: \u00A75" + formatInt(bwStats.get(gamemode + "_wins_bedwars").getAsInt())
-                        + "\u00A7f      Coins: \u00A76" + formatInt(bwStats.get("coins").getAsInt()));
+                        + "\u00A7r      Coins: \u00A76" + formatInt(bwStats.get("coins").getAsInt()));
                 result.add("K: " + formatInt(bwStats.get(gamemode + "_kills_bedwars").getAsInt()) + "     D: "
                         + formatInt(bwStats.get(gamemode + "_deaths_bedwars").getAsInt()));
                 result.add("FK: " + formatInt(bwStats.get(gamemode + "_final_kills_bedwars").getAsInt())
@@ -262,7 +262,7 @@ public class Stats {
                 result.add("FK/D: " + kdString + "      W/L: " + wlString);
             } else {
                 result.add("Wins: \u00A75" + formatInt(bwStats.get(gamemode + "_wins_bedwars").getAsInt())
-                        + "\u00A7f      Coins: \u00A76" + formatInt(bwStats.get("coins").getAsInt()));
+                        + "\u00A7r      Coins: \u00A76" + formatInt(bwStats.get("coins").getAsInt()));
                 result.add("Kills: " + formatInt(bwStats.get(gamemode + "_kills_bedwars").getAsInt()) + "     Deaths: "
                         + formatInt(bwStats.get(gamemode + "_deaths_bedwars").getAsInt()));
                 result.add("Final Kills: " + formatInt(bwStats.get(gamemode + "_final_kills_bedwars").getAsInt())
@@ -288,9 +288,9 @@ public class Stats {
         try {
             JsonObject swStats = playerStats.get("SkyWars").getAsJsonObject();
             String kdString, wlString;
-            result.add("Level: " + swStats.get("levelFormatted").getAsString() + "\u00A7f    Mode: \u00A75"
+            result.add("Level: " + swStats.get("levelFormatted").getAsString() + "\u00A7r    Mode: \u00A75"
                     + gamemodeFormatted);
-            result.add("Heads: \u00A75" + formatInt(swStats.get("heads").getAsInt()) + "\u00A7f     Coins: \u00A76"
+            result.add("Heads: \u00A75" + formatInt(swStats.get("heads").getAsInt()) + "\u00A7r     Coins: \u00A76"
                     + formatInt(swStats.get("coins").getAsInt()));
             result.add("Kills: " + formatInt(swStats.get("kills_" + gamemode).getAsInt()) + "     Deaths: "
                     + formatInt(swStats.get("deaths_" + gamemode).getAsInt()));
@@ -320,13 +320,13 @@ public class Stats {
             int lvlInt = (int) Math.round(lvl);
             String kdString, wlString;
             String winstreak;
-            result.add("Level: \u00A74" + lvlInt + "\u00A7f       Mode: \u00A75" + gamemodeFormatted);
+            result.add("Level: \u00A74" + lvlInt + "\u00A7r       Mode: \u00A75" + gamemodeFormatted);
             try {
                 winstreak = duelStats.get("best_winstreak_mode_" + gamemode).getAsString();
             } catch (Exception e) {
                 winstreak = "0";
             }
-            result.add("Best Winstreak: \u00A75" + winstreak + "\u00A7f     Coins: \u00A76"
+            result.add("Best Winstreak: \u00A75" + winstreak + "\u00A7r     Coins: \u00A76"
                     + formatInt(duelStats.get("coins").getAsInt()));
             if (gamemode.contains("bridge")) { // bridge is different for some reason... why
                 result.add("Kills: " + formatInt(duelStats.get(gamemode + "_bridge_kills").getAsInt()) + "           Deaths: "

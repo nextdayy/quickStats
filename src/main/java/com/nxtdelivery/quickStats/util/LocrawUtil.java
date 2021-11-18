@@ -34,7 +34,7 @@ public class LocrawUtil {
     public void send() {
         MinecraftForge.EVENT_BUS.register(this);
         try {
-            if (GUIConfig.autoGame) {
+            if (GUIConfig.autoGame && mc.getCurrentServerData().serverIP.contains("hypixel")) {
                 mc.thePlayer.sendChatMessage("/locraw");
             } else {
                 gameType = "";

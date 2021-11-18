@@ -261,7 +261,7 @@ public class GUIConfig extends Vigilant {
             type = PropertyType.COLOR, name = "Text Color",
             description = "Change the color of the text.",
             category = "Gui Settings", subcategory = "Colors",
-            min = 1, max = 255, hidden = true       // TODO
+            min = 1, max = 255
     )
     public static Color textColor = new Color(255, 255, 255, 255);
 
@@ -293,8 +293,8 @@ public class GUIConfig extends Vigilant {
     public static boolean avatarHead = false;
     @Property(
             type = PropertyType.DECIMAL_SLIDER, name = "Window Time",
-            description = "How long the stats window should display for. (default: 7)",
-            category = "Gui Settings", subcategory = "Gui",
+            description = "How long the stats window should display for before rendering progress bar. (default: 7)",
+            category = "Gui Settings", subcategory = "Framerate",
             minF = 3f, maxF = 10f
     )
     public static float GUITime = 7f;
@@ -309,9 +309,25 @@ public class GUIConfig extends Vigilant {
             type = PropertyType.SELECTOR, name = "Color Preset",
             description = "Set the color scheme of the window according to a preset.\nIf you want to use your own colors, set this to default.",
             category = "Gui Settings", subcategory = "Presets",
-            options = {"Default (Blue)", "Essential (Green)", "Gamer (Red)", "Pinkulu (Pink)"}
+            options = {"Default (Blue)", "Essential (Green)", "Gamer (Red)", "Pinkulu (Pink)", "Clean (Transparent)", "White"}
     )
     public static int colorPreset = 0;
+    @Property(
+            type = PropertyType.SLIDER, name = "Window Framerate",
+            description = "Frame multiplier when rendering. Higher numbers mean slower animations.\n\u00A7eMay cause window to look jittery on high numbers!",
+            category = "Gui Settings", subcategory = "Framerate",
+            max = 4
+    )
+    public static int framesToSkip = 0;
+    @Property(
+            type = PropertyType.SLIDER, name = "Progress Bar Speed",
+            description = "Speed of the progress bar. Higher numbers mean slower animations.\n\u00A7eMay cause jitter on high numbers!",
+            category = "Gui Settings", subcategory = "Framerate",
+            max = 5
+    )
+    public static int framesToSkipP = 0;
+
+
 
 
     @Property(

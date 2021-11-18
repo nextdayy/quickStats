@@ -21,7 +21,7 @@ public class GUIStats extends Gui {
     private static final Minecraft mc = Minecraft.getMinecraft();
     FontRenderer fr = mc.fontRendererObj;
     long systemTime = Minecraft.getSystemTime();
-    Integer height, width, top, bottom, middle, halfWidth, seed, pad, padY, scaledX, scaledY, midX, midY;
+    Integer height, width, top, bottom, middle, halfWidth, seed, pad, padY, scaledX, scaledY, midX, midY, frame, progFrame;
     long frames, framesLeft, fifth, upperThreshold, lowerThreshold;
     Color progColor, bgColor, textColor;
     Float fontScale, percentComplete;
@@ -41,6 +41,8 @@ public class GUIStats extends Gui {
         scaledY = height / 100;
         midX = width / 2;
         midY = height / 2;
+        frame = 0;
+        progFrame = 0;
         guiScale = mc.gameSettings.guiScale;
         systemTime = Minecraft.getSystemTime();
         frames = 5 * 60;
@@ -85,7 +87,7 @@ public class GUIStats extends Gui {
             seed = (halfWidth * 2);
             pad = roundIntWithFloat(middle, 1.25f) - halfWidth - 10;
             padY = roundIntWithFloat(top, 1.25f) + 26;
-            switch (guiScale) {         // TODO add color presets!
+            switch (guiScale) {
                 case 0: // AUTO scale, I have no idea why it is so different
                     top = 28;
                     bottom = 70;
@@ -103,17 +105,27 @@ public class GUIStats extends Gui {
             case 1:         // essential
                 this.progColor = new Color(14, 156, 91, 255);
                 this.bgColor = new Color(22, 22, 24, 255);
-                //GUIConfig.textColor = new Color(183, 185, 189, 255);
+                this.textColor = new Color(255, 255, 255, 255);
                 break;
             case 2:         // red
                 this.progColor = new Color(149, 0, 0, 150);
                 this.bgColor = new Color(17, 17, 27, 200);
-                //GUIConfig.textColor = new Color(53, 0, 1, 255);
+                this.textColor = new Color(53, 0, 1, 255);
                 break;
             case 3:         // PINKULU
                 this.progColor = new Color(247, 101, 163, 200);
                 this.bgColor = new Color(255, 164, 182, 100);
-                //GUIConfig.textColor = new Color(255, 164, 182, 255);
+                this.textColor = new Color(255, 164, 182, 255);
+                break;
+            case 4:         // transparent
+                this.bgColor = new Color(50,50,50,30);
+                this.progColor = new Color(43,43,43,40);
+                this.textColor = new Color(255,255,255,220);
+                break;
+            case 5:         // white theme
+                this.progColor = new Color(0,0,0,110);
+                this.bgColor = new Color(255,255,255,73);
+                this.textColor = new Color(241,241,241,255);
                 break;
             default:
                 this.progColor = GUIConfig.progColor;
@@ -130,10 +142,11 @@ public class GUIStats extends Gui {
         if (GUIConfig.doSound) {
             mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
         }
-        /*if (GUIConfig.debugMode) {
-            System.out.println("SCALE=" + guiScale + " HEIGHT=" + height + " WIDTH=" + width + " SCALEDX=" + scaledX + " SCALEDY=" + scaledY);
-            System.out.println("MIDDLE=" + middle + " TOP=" + top + " BOTTOM=" + bottom + " WIDTH=" + halfWidth + " SCALE=" + fontScale + " PADX=" + pad + " PADY=" + padY + "  if this is in production build then feel free to hit me");
-        }*/
+        //if (GUIConfig.debugMode) {
+        //    QuickStats.LOGGER.info("---- Window Debug Information ----");
+        //    QuickStats.LOGGER.info("SCALE=" + guiScale + " HEIGHT=" + height + " WIDTH=" + width + " SCALEDX=" + scaledX + " SCALEDY=" + scaledY);
+        //    QuickStats.LOGGER.info("MIDDLE=" + middle + " TOP=" + top + " BOTTOM=" + bottom + " WIDTH=" + halfWidth + " SCALE=" + fontScale + " PADX=" + pad + " PADY=" + padY);
+        //}
         this.register();
     }
 
@@ -177,11 +190,20 @@ public class GUIStats extends Gui {
         }
 
         while (systemTime < Minecraft.getSystemTime() + (1000 / 60)) {
-            framesLeft--;
+            if(progFrame == GUIConfig.framesToSkipP) {
+                framesLeft--;
+                progFrame = -1;
+            }
+            progFrame++;
             systemTime += (1000 / 60);
         }
-        percentComplete = clamp(easeOut(percentComplete,
-                framesLeft < lowerThreshold ? 0.0f : framesLeft > upperThreshold ? 1.0f : framesLeft));
+        if(frame == GUIConfig.framesToSkip) {
+            frame = 0;
+            percentComplete = clamp(easeOut(percentComplete,
+                    framesLeft < lowerThreshold ? 0.0f : framesLeft > upperThreshold ? 1.0f : framesLeft));
+        } else {
+            frame++;
+        }
 
         if (GUIConfig.sizeEnabled) {
             middle = width - GUIConfig.winMiddle;

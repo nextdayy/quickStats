@@ -71,42 +71,34 @@ public class StatsCommand implements ICommand {
                     break;
                 case "reload":
                     QuickStats.LOGGER.info("Reloading config and version checker...");
-                    sender.addChatMessage(new ChatComponentText(
-                            Reference.COLOR + "[QuickStats] Reloading!"));
+                    QuickStats.sendMessages("Reloading!");
                     GUIConfig.INSTANCE.initialize();
                     QuickStats.updateCheck = UpdateChecker.updateNeeded(Reference.VERSION);
-                    sender.addChatMessage(new ChatComponentText(Reference.COLOR
-                            + "[QuickStats] Reloaded! Re-log and check logs for more information."));
+                    QuickStats.sendMessages("Reloaded! Re-log and check logs for more information.");
                     Minecraft.getMinecraft().thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
                     break;
                 case "api":
                     GUIConfig.apiKey = args[1];
                     GUIConfig.INSTANCE.markDirty();
                     GUIConfig.INSTANCE.writeData();
-                    sender.addChatMessage(new ChatComponentText(
-                            Reference.COLOR + ("[QuickStats] set your API key as: " + args[1] + ".")));
+                    QuickStats.sendMessages("set your API key as: " + args[1] + ".");
                     break;
                 case "testLoc":
-                    sender.addChatMessage(new ChatComponentText(
-                            Reference.COLOR + "[QuickStats] Testing locraw function..."));
+                    QuickStats.sendMessages("Testing locraw function...");
                     QuickStats.LocInst.send();
                     break;
                 case "test":
-                    sender.addChatMessage(new ChatComponentText(
-                            Reference.COLOR + "[QuickStats] Testing function..."));
+                    QuickStats.sendMessages("Testing function...");
                     QuickStats.GuiInst.showGUI("nxtdaydelivery");
                     break;
                 case "testEntity":
                     try {
-                        sender.addChatMessage(new ChatComponentText(
-                                Reference.COLOR + "[QuickStats] Testing getEntity function..."));
+                        QuickStats.sendMessages("[QuickStats] Testing getEntity function...");
                         QuickStats.LOGGER.info(GetEntity.get(0).getName());
-                        sender.addChatMessage(new ChatComponentText(
-                                Reference.COLOR + "[QuickStats] entity = " + GetEntity.get(0).getName()));
+                        QuickStats.sendMessages("entity = " + GetEntity.get(0).getName());
                     } catch (Exception e) {
                         QuickStats.LOGGER.info("entity = null");
-                        sender.addChatMessage(new ChatComponentText(
-                                Reference.COLOR + "[QuickStats] entity = null"));
+                        QuickStats.sendMessages();
                     }
                     break;
                 default:
