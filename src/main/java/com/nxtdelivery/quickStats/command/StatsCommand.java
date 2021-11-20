@@ -98,7 +98,6 @@ public class StatsCommand implements ICommand {
                         QuickStats.sendMessages("entity = " + GetEntity.get(0).getName());
                     } catch (Exception e) {
                         QuickStats.LOGGER.info("entity = null");
-                        QuickStats.sendMessages();
                     }
                     break;
                 default:

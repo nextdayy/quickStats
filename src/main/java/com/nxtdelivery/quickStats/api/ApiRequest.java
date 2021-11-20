@@ -3,11 +3,11 @@ package com.nxtdelivery.quickStats.api;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.nxtdelivery.quickStats.QuickStats;
+import com.nxtdelivery.quickStats.Reference;
 import com.nxtdelivery.quickStats.gui.GUIConfig;
 import com.nxtdelivery.quickStats.util.LocrawUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.EnumChatFormatting;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -51,14 +51,14 @@ public class ApiRequest extends Thread {
             uuid = jsonObject.get("id").getAsString();
         } catch (IllegalStateException e) {
             mc.thePlayer.addChatMessage(new ChatComponentText(
-                    EnumChatFormatting.DARK_GRAY + "[QuickStats] Player not found: " + username));
+                    Reference.COLOR + "[QuickStats] Player not found: " + username));
             noUser = true;
             return;
         } catch (Exception e) {
             if (GUIConfig.debugMode) {
                 e.printStackTrace();
             }
-            mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
+            mc.thePlayer.addChatMessage(new ChatComponentText(Reference.COLOR
                     + "[QuickStats] an unexpected error occurred. Check logs for more info."));
             generalError = true;
         }
@@ -127,7 +127,7 @@ public class ApiRequest extends Thread {
                 endTime = (int) System.currentTimeMillis() - startTime;
                 QuickStats.LOGGER.info("successfully processed all data in " + endTime + "ms");
             } else {
-                mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
+                mc.thePlayer.addChatMessage(new ChatComponentText(Reference.COLOR
                         + "[QuickStats] The Hypixel API didn't process the request properly. Try again."));
                 generalError = true;
                 QuickStats.LOGGER.error("error occurred when building after API request, closing");
@@ -135,18 +135,18 @@ public class ApiRequest extends Thread {
 
         } catch (IOException e) {
             if (GUIConfig.apiKey.equals("none")) {
-                mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
+                mc.thePlayer.addChatMessage(new ChatComponentText(Reference.COLOR
                         + "[QuickStats] You haven't set an API key yet! Type /api new to get one, and the mod should grab it."));
                 noAPI = true;
             } else {
                 if (e.getMessage().contains("504 for URL")) {
-                    mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
+                    mc.thePlayer.addChatMessage(new ChatComponentText(Reference.COLOR
                             + "[QuickStats] failed to contact the Hypixel API. Request timed out!"));
                     timeOut = true;
                 } else {
-                    mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
+                    mc.thePlayer.addChatMessage(new ChatComponentText(Reference.COLOR
                             + "[QuickStats] failed to contact Hypixel API. This is usually due to an invalid API key."));
-                    mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
+                    mc.thePlayer.addChatMessage(new ChatComponentText(Reference.COLOR
                             + "[QuickStats] On Hypixel, type /api new to get a new key and the mod should automatically grab it."));
                     if (GUIConfig.debugMode) {
                         e.printStackTrace();
@@ -159,7 +159,7 @@ public class ApiRequest extends Thread {
             if (GUIConfig.debugMode) {
                 e.printStackTrace();
             }
-            mc.thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_GRAY
+            mc.thePlayer.addChatMessage(new ChatComponentText(Reference.COLOR
                     + "[QuickStats] an unexpected error occurred. Check logs for more info."));
             generalError = true;
         }

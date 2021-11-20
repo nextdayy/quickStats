@@ -37,7 +37,7 @@ public class LocrawUtil {
             if (GUIConfig.autoGame && mc.getCurrentServerData().serverIP.contains("hypixel")) {
                 mc.thePlayer.sendChatMessage("/locraw");
             } else {
-                gameType = "";
+                gameType = "DEFAULT";
             }
         } catch (Exception e) {
             QuickStats.LOGGER
@@ -47,38 +47,39 @@ public class LocrawUtil {
 
 
     @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
-    public String getGameType(ClientChatReceivedEvent event) {
+    public void getGameType(ClientChatReceivedEvent event) {
         if (event.message.getUnformattedText().contains("{")) {
-            // System.out.println("locraw util found msg");
             if (!GUIConfig.locrawComp) {
                 event.setCanceled(true);
             }
             try {
                 JsonObject jsonObject = new JsonParser().parse(event.message.getUnformattedText()).getAsJsonObject();
-                destroy();
                 try {
                     gameType = jsonObject.get("mode").toString();
                     lobby = false;
-                } catch (Exception e) {
+                } catch (Exception e) {     // this means we are in a lobby
                     try {
                         gameType = jsonObject.get("gametype").toString();
                         lobby = true;
-                    } catch (Exception e1) { // catch if in limbo
-                        gameType = "limbo";
-                        return "limbo";
+                        if (GUIConfig.debugMode) {
+                            QuickStats.LOGGER.info("detected this as a lobby");
+                        }
+                    } catch (Exception e1) { // catch if errors/in limbo
+                        if (GUIConfig.debugMode) {
+                            e.printStackTrace();
+                        }
+                        lobby = false;
+                        gameType = "LIMBO";
                     }
                 }
+
                 QuickStats.LOGGER.info(gameType);
-                return gameType;
             } catch (Exception e) {
                 if (GUIConfig.debugMode) {
                     e.printStackTrace();
                 }
-                // gameType = "solo_insane";
-                return "solo_insane";
+                gameType = "DEFAULT";
             }
-        } else {
-            return "e";
         }
     }
 }

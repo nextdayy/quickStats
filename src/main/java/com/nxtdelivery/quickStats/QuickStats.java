@@ -1,13 +1,12 @@
-/* Changelog v1.5.6
+/* Changelog v1.6.2
  *  fix the mod working (or rather not working) on other servers
- *  optimize use of the reference class
- *  fixes for the text padding + the window position in general
- *  removed limits on the custom window
- *  added /qs <name> <gamemode> with human words
- *  added bolding of party detection
- *  added window presets!
- *  added color presets!
+ *  optimize the locraw utility
+ *  fix the auto game being off actually turning off
+ *  stopped showing stats if player is NPC
+ *  changed color of text to be easier to read
  *  added window speed modification
+ *  fixed version checker sending messages
+ *  rewrote stats to be null-protected
  *  bug fixes
  *  code cleanup
  */
@@ -95,7 +94,7 @@ public class QuickStats {
 
     @SubscribeEvent
     public void onKeyPress(InputEvent.KeyInputEvent event) {
-        if(onHypixel || GUIConfig.otherServer) {
+        if (onHypixel || GUIConfig.otherServer) {
             if (Keyboard.getEventKey() == statsKey.getKeyCode() && GUIConfig.modEnabled) {
                 if (GUIConfig.key != statsKey.getKeyCode()) {                // will write new key code if the player changed it in settings
                     LOGGER.warn("Key code from config (" + GUIConfig.key + ") differs to key code just used! (" + statsKey.getKeyCode() + ") writing new to config file...");
@@ -107,6 +106,12 @@ public class QuickStats {
                     try {
                         Entity entity = GetEntity.get(0);
                         if (entity instanceof EntityPlayer) {
+                            if (entity.getName() == null || entity.getName().equals("")) {
+                                return;
+                            }
+                            if (entity.getDisplayName().getUnformattedText().startsWith("\u00A78[NPC]") || !entity.getDisplayName().getUnformattedText().startsWith("\u00A7")) {      // npc test
+                                return;
+                            }
                             GuiInst.showGUI(entity.getName());
                         }
                     } catch (Exception ignored) {
@@ -141,49 +146,18 @@ public class QuickStats {
                     }
                 }
             }
+
             if (GUIConfig.doPartyDetection) {
                 if (QuickStats.locraw) {
                     QuickStats.locraw = false;
                     LocInst.send();
                 }
-                try {
-                    if (event.message.getUnformattedText().contains("Party ")) {
-                        return;
-                    }
-                    if (GUIConfig.doPartyDetectionPLUS) {
-                        if (event.message.getUnformattedText().contains("say") && getUsernameFromChat(event.message.getUnformattedText()).equals(mc.thePlayer.getName())) {
-                            try {
-                                String unformatted = EnumChatFormatting.getTextWithoutFormattingCodes(event.message.getUnformattedText());
-                                partySet = StringUtils.substringAfter(unformatted, "say ");
-                                set = true;
-                                if (partySet.contains("my name")) {
-                                    partySet = null;
-                                    set = false;
-                                }
-                                if (GUIConfig.debugMode) {
-                                    LOGGER.info(partySet);
-                                }
-                            } catch (Exception e) {
-                                if (GUIConfig.debugMode) {
-                                    e.printStackTrace();
-                                    set = false;
-                                }
-                            }
+                if (LocrawUtil.lobby) {
+                    try {
+                        if (event.message.getUnformattedText().contains("Party ") || event.message.getUnformattedText().contains("lobby!")) {
+                            return;
                         }
-                        if (set && event.message.getUnformattedText().contains(partySet) && LocrawUtil.lobby) {
-                            String username = getUsernameFromChat(event.message.getUnformattedText());
-                            if (!username.equalsIgnoreCase(mc.thePlayer.getName())) {
-                                event.setCanceled(true);
-                                StringBuilder sb = new StringBuilder(event.message.getUnformattedText());
-                                sb.insert(event.message.getUnformattedText().indexOf(partySet), "\u00A7l");
-                                mc.thePlayer.addChatMessage(new ChatComponentText(sb.toString()));
-                                GuiInst.showGUI(username);
-                                return;
-                            }
-                        }
-                    }
-                    if (event.message.getUnformattedText().contains(mc.thePlayer.getName()) && LocrawUtil.lobby) {
-                        if (!event.message.getUnformattedText().contains("lobby!")) {
+                        if (event.message.getUnformattedText().contains(mc.thePlayer.getName())) {
                             String username = getUsernameFromChat(event.message.getUnformattedText());
                             if (!username.equalsIgnoreCase(mc.thePlayer.getName())) {
                                 event.setCanceled(true);
@@ -193,10 +167,44 @@ public class QuickStats {
                                 GuiInst.showGUI(username);
                             }
                         }
-                    }
-                } catch (Exception e) {
-                    if (GUIConfig.debugMode) {
-                        //e.printStackTrace();
+
+                        if (GUIConfig.doPartyDetectionPLUS) {
+                            if (event.message.getUnformattedText().contains("say") && getUsernameFromChat(event.message.getUnformattedText()).equals(mc.thePlayer.getName())) {
+                                try {
+                                    String unformatted = EnumChatFormatting.getTextWithoutFormattingCodes(event.message.getUnformattedText());
+                                    partySet = StringUtils.substringAfter(unformatted, "say ");
+                                    set = true;
+                                    if (partySet.contains("my name")) {
+                                        partySet = null;
+                                        set = false;
+                                    }
+                                    if (GUIConfig.debugMode) {
+                                        LOGGER.info(partySet);
+                                    }
+                                } catch (Exception e) {
+                                    if (GUIConfig.debugMode) {
+                                        e.printStackTrace();
+                                        set = false;
+                                    }
+                                }
+                            }
+                            if (set) {
+                                if (event.message.getUnformattedText().contains(partySet)) {
+                                    String username = getUsernameFromChat(event.message.getUnformattedText());
+                                    if (!username.equalsIgnoreCase(mc.thePlayer.getName())) {
+                                        event.setCanceled(true);
+                                        StringBuilder sb = new StringBuilder(event.message.getUnformattedText());
+                                        sb.insert(event.message.getUnformattedText().indexOf(partySet), "\u00A7l");
+                                        mc.thePlayer.addChatMessage(new ChatComponentText(sb.toString()));
+                                        GuiInst.showGUI(username);
+                                    }
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        if (GUIConfig.debugMode) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
@@ -217,53 +225,71 @@ public class QuickStats {
 
 
     @SubscribeEvent
+    @SuppressWarnings({"ConstantConditions", "MismatchedStringCase"})
     public void onWorldLoad(WorldEvent.Load event) {
         try {
             if (mc.getCurrentServerData().serverIP.contains("hypixel")) {
-                if (GUIConfig.debugMode) { LOGGER.info("on Hypixel!"); }
+                if (GUIConfig.debugMode) {
+                    LOGGER.info("on Hypixel!");
+                }
                 locraw = true;
                 onHypixel = true;
+                LocrawUtil.lobby = false;
             } else {
                 onHypixel = false;
+                LocrawUtil.lobby = false;
+                locraw = false;
             }
         } catch (Exception e) {
             // if(GUIConfig.debugMode) {e.printStackTrace();}
         }
-        if (updateCheck && GUIConfig.sendUp) {
+        if (updateCheck && GUIConfig.sendUp && event.world.isRemote) {
             new TickDelay(this::sendUpdateMessage, 20);
             updateCheck = false;
         }
-        if (Reference.VERSION.contains("beta") && betaFlag) {
+        if (Reference.VERSION.contains("beta") && betaFlag && event.world.isRemote) {
             try {
                 new TickDelay(() -> sendMessages("",
                         "Beta build has been detected (ver. " + Reference.VERSION + ")",
                         "Note that some features might be unstable! Use at your own risk!"), 20);
                 betaFlag = false;
-                return;
-            } catch (NullPointerException e) {
-                LOGGER.fatal(e);
+            } catch (Exception e) {
+                betaFlag = true;
+                if (GUIConfig.debugMode) {
+                    e.printStackTrace();
+                }
                 LOGGER.error("skipping beta message, bad world return!");
             }
         }
         if (corrupt) {
-            new TickDelay(() -> sendMessages("",
-                    "An error occurred while trying to read your config file. You will have to reset it.",
-                    "If you just reset your configuration file, ignore this message."), 20);
-            corrupt = false;
+            try {
+                new TickDelay(() -> sendMessages("",
+                        "An error occurred while trying to read your config file. You will have to reset it.",
+                        "If you just reset your configuration file, ignore this message."), 20);
+                corrupt = false;
+            } catch (Exception e) {
+                if (GUIConfig.debugMode) {
+                    e.printStackTrace();
+                }
+                LOGGER.error("skipping corrupt message, bad world return!");
+            }
         }
     }
 
+    @SuppressWarnings({"ConstantConditions", "MismatchedStringCase"})
     public static void sendMessages(String... messages) {
         try {
-            mc.thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
             for (String message : messages) {
                 mc.thePlayer.addChatMessage(new ChatComponentText(Reference.COLOR + "[" + Reference.NAME + "] " + message));
             }
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
+            LOGGER.error("Didn't send message: " + e.getMessage());
             if (GUIConfig.debugMode) {
                 e.printStackTrace();
             }
-            LOGGER.error("skipping new message, bad world return!");
+            if (Reference.VERSION.contains("beta")) {
+                betaFlag = true;
+            }
         }
     }
 
@@ -285,7 +311,10 @@ public class QuickStats {
             mc.thePlayer.addChatMessage(new ChatComponentText(
                     Reference.COLOR + "--------------------------------------"));
         } catch (NullPointerException e) {
-            LOGGER.fatal(e);
+            if (GUIConfig.debugMode) {
+                e.printStackTrace();
+            }
+            updateCheck = true;
             LOGGER.error("skipping update message, bad world return!");
         }
     }

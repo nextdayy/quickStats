@@ -1,9 +1,9 @@
 package com.nxtdelivery.quickStats.util;
 
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.common.MinecraftForge;
 
 public class TickDelay {
     Integer delay;

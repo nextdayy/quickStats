@@ -29,6 +29,7 @@ public class GUIStats extends Gui {
     ApiRequest api;
     public static Integer guiScale;
 
+
     public GUIStats() {
         register();
     }
@@ -97,7 +98,7 @@ public class GUIStats extends Gui {
                     padY = 100;
                     break;
                 case 3: // LARGE
-                    middle = midX + (scaledX * 37);
+                    middle = midX + (scaledX * (xOffset - 3));
                     break;
             }
         }
@@ -160,10 +161,22 @@ public class GUIStats extends Gui {
         MinecraftForge.EVENT_BUS.register(this);
     }
 
+    /**
+     * This math function was taken from PopupEvents by Sk1er LLC under GNU General License.
+     * This code is used to add smooth animations to the window.
+     * @param number that needs to be clamped into range of 0 to 1
+     * @return clamped number
+     */
     private static float clamp(float number) {
         return number < (float) 0.0 ? (float) 0.0 : Math.min(number, (float) 1.0);
     }
-
+    /**
+     * This math function was taken from PopupEvents by Sk1er LLC under GNU General License.
+     * This code is used to add smooth animations to the window.
+     * @param current the current number in question
+     * @param goal the target number
+     * @return integer number
+     */
     private static float easeOut(float current, float goal) {
         if (Math.floor(Math.abs(goal - current) / (float) 0.01) > 0) {
             return current + (goal - current) / (float) 15.0;
@@ -172,18 +185,18 @@ public class GUIStats extends Gui {
         }
     }
 
-
+    /**
+     * Multiply an Integer with a float value, then round it back to an Integer
+     * @param number the Integer that needs to be multiplied
+     * @param multiplier the Float that will multiply the Integer
+     * @return the value multiplied then rounded back to an Integer.
+     */
     private static int roundIntWithFloat(int number, float multiplier) {
         float tempF = number * multiplier;
         return (int) tempF;
     }
 
     @SubscribeEvent
-	/*
-	  Some of this code was taken from PopupEvents by Sk1er Club under GNU License.
-	  This math logic is used to render the window smoothly. All thanks to them,
-	  this window can render nice and smoothly!
-	 */
     public void renderEvent(TickEvent.RenderTickEvent event) {
         if (framesLeft <= 0) {
             return;

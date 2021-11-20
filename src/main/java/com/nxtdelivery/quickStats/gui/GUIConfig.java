@@ -52,7 +52,7 @@ public class GUIConfig extends Vigilant {
     public static boolean otherServer = true;
     @Property(
             type = PropertyType.SWITCH, name = "Party Detection",
-            description = "Enable/Disable detection of your name being mentioned to trigger players' stats.\n\u00A7eUseful for BedWars parties.",
+            description = "Enable/Disable detection of your name being mentioned to trigger players' stats.\n\u00A7eUseful for BedWars parties. May cause performance issues on low-end hardware!",
             category = "General", subcategory = "Parties"
     )
     public static boolean doPartyDetection = true;
