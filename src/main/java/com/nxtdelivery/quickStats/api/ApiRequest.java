@@ -21,7 +21,7 @@ import java.util.ArrayList;
 
 public class ApiRequest extends Thread {
     private static final Minecraft mc = Minecraft.getMinecraft();
-    String username, rank, rankColor, playerName;
+    public static String username, rank, rankColor, playerName;
     public JsonObject rootStats, achievementStats;
     public String formattedName;
     public ArrayList<String> result;
@@ -30,6 +30,8 @@ public class ApiRequest extends Thread {
     public boolean generalError = false;
     public boolean noAPI = false;
     public boolean timeOut = false;
+    public boolean slowDown = false;
+    public static int karma;
     public String uuid;
     public BufferedImage image;
     int startTime, endTime;
@@ -91,6 +93,7 @@ public class ApiRequest extends Thread {
                 JsonObject js2 = js1.get("player").getAsJsonObject();
                 try { // get rank and name
                     exp = js2.get("networkExp").getAsDouble();
+                    karma = js2.get("karma").getAsInt();
                     playerName = js2.get("displayname").getAsString();
                     rank = js2.get("newPackageRank").getAsString();
                     if (rank.equals("MVP_PLUS")) {
@@ -143,6 +146,10 @@ public class ApiRequest extends Thread {
                     mc.thePlayer.addChatMessage(new ChatComponentText(Reference.COLOR
                             + "[QuickStats] failed to contact the Hypixel API. Request timed out!"));
                     timeOut = true;
+                } else if (e.getMessage().contains("429 for URL")){
+                    mc.thePlayer.addChatMessage(new ChatComponentText(Reference.COLOR
+                            + "[QuickStats] the Hypixel API didn't respond as you are sending requests too fast! Slow down!"));
+                    slowDown = true;
                 } else {
                     mc.thePlayer.addChatMessage(new ChatComponentText(Reference.COLOR
                             + "[QuickStats] failed to contact Hypixel API. This is usually due to an invalid API key."));

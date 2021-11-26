@@ -1,12 +1,15 @@
-/* Changelog v1.6.2
+/* Changelog v@VER@
  *  fix the mod working (or rather not working) on other servers
  *  optimize the locraw utility
+ *  optimize the party detection in hope of making it more efficient
  *  fix the auto game being off actually turning off
  *  stopped showing stats if player is NPC
  *  changed color of text to be easier to read
  *  added window speed modification
  *  fixed version checker sending messages
  *  rewrote stats to be null-protected
+ *  added animations to the window
+ *  added hash checker (beta)
  *  bug fixes
  *  code cleanup
  */
@@ -67,8 +70,6 @@ public class QuickStats {
 
     @EventHandler()
     public void init(FMLInitializationEvent event) {
-        LocInst = new LocrawUtil();
-        GuiInst = new GUIStats();
         LOGGER.info("reading config...");
         try {
             GUIConfig.INSTANCE.preload();
@@ -80,13 +81,16 @@ public class QuickStats {
             corrupt = true;
             LOGGER.error("Config failed to read. File has been reset. If you just reset your config, ignore this message.");
         }
-        LOGGER.info("attempting to check update status...");
-        updateCheck = UpdateChecker.updateNeeded(Reference.VERSION);
+        LOGGER.info("attempting to check update status and authenticity of mod...");
+        updateCheck = UpdateChecker.checkUpdate(Reference.VERSION);
+        //AuthChecker.checkAuth(JarName);  // TODO
         LOGGER.info("registering settings...");
         statsKey = new KeyBinding("Get Stats", GUIConfig.key, "QuickStats");
         ClientRegistry.registerKeyBinding(statsKey);
         MinecraftForge.EVENT_BUS.register(this);
         ClientCommandHandler.instance.registerCommand(new StatsCommand());
+        LocInst = new LocrawUtil();
+        GuiInst = new GUIStats();
         locraw = true;
         LOGGER.debug(instance.toString());        // please stop moaning at me intellij
         LOGGER.info("Complete! QuickStats loaded successfully.");
@@ -109,8 +113,10 @@ public class QuickStats {
                             if (entity.getName() == null || entity.getName().equals("")) {
                                 return;
                             }
-                            if (entity.getDisplayName().getUnformattedText().startsWith("\u00A78[NPC]") || !entity.getDisplayName().getUnformattedText().startsWith("\u00A7")) {      // npc test
-                                return;
+                            if(onHypixel) {
+                                if (entity.getDisplayName().getUnformattedText().startsWith("\u00A78[NPC]") || !entity.getDisplayName().getUnformattedText().startsWith("\u00A7")) {      // npc test
+                                    return;
+                                }
                             }
                             GuiInst.showGUI(entity.getName());
                         }
@@ -169,34 +175,36 @@ public class QuickStats {
                         }
 
                         if (GUIConfig.doPartyDetectionPLUS) {
-                            if (event.message.getUnformattedText().contains("say") && getUsernameFromChat(event.message.getUnformattedText()).equals(mc.thePlayer.getName())) {
-                                try {
-                                    String unformatted = EnumChatFormatting.getTextWithoutFormattingCodes(event.message.getUnformattedText());
-                                    partySet = StringUtils.substringAfter(unformatted, "say ");
-                                    set = true;
-                                    if (partySet.contains("my name")) {
-                                        partySet = null;
-                                        set = false;
-                                    }
-                                    if (GUIConfig.debugMode) {
-                                        LOGGER.info(partySet);
-                                    }
-                                } catch (Exception e) {
-                                    if (GUIConfig.debugMode) {
-                                        e.printStackTrace();
-                                        set = false;
+                            if (event.message.getUnformattedText().contains("say")) {
+                                if (getUsernameFromChat(event.message.getUnformattedText()).equals(mc.thePlayer.getName())) {
+                                    try {
+                                        String unformatted = EnumChatFormatting.getTextWithoutFormattingCodes(event.message.getUnformattedText());
+                                        partySet = StringUtils.substringAfter(unformatted, "say ");
+                                        set = true;
+                                        if (partySet.contains("my name")) {
+                                            partySet = null;
+                                            set = false;
+                                        }
+                                        if (GUIConfig.debugMode) {
+                                            LOGGER.info(partySet);
+                                        }
+                                    } catch (Exception e) {
+                                        if (GUIConfig.debugMode) {
+                                            e.printStackTrace();
+                                            set = false;
+                                        }
                                     }
                                 }
-                            }
-                            if (set) {
-                                if (event.message.getUnformattedText().contains(partySet)) {
-                                    String username = getUsernameFromChat(event.message.getUnformattedText());
-                                    if (!username.equalsIgnoreCase(mc.thePlayer.getName())) {
-                                        event.setCanceled(true);
-                                        StringBuilder sb = new StringBuilder(event.message.getUnformattedText());
-                                        sb.insert(event.message.getUnformattedText().indexOf(partySet), "\u00A7l");
-                                        mc.thePlayer.addChatMessage(new ChatComponentText(sb.toString()));
-                                        GuiInst.showGUI(username);
+                                if (set) {
+                                    if (event.message.getUnformattedText().contains(partySet)) {
+                                        String username = getUsernameFromChat(event.message.getUnformattedText());
+                                        if (!username.equalsIgnoreCase(mc.thePlayer.getName())) {
+                                            event.setCanceled(true);
+                                            StringBuilder sb = new StringBuilder(event.message.getUnformattedText());
+                                            sb.insert(event.message.getUnformattedText().indexOf(partySet), "\u00A7l");
+                                            mc.thePlayer.addChatMessage(new ChatComponentText(sb.toString()));
+                                            GuiInst.showGUI(username);
+                                        }
                                     }
                                 }
                             }

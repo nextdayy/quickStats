@@ -55,11 +55,11 @@ public class LocrawUtil {
             try {
                 JsonObject jsonObject = new JsonParser().parse(event.message.getUnformattedText()).getAsJsonObject();
                 try {
-                    gameType = jsonObject.get("mode").toString();
+                    gameType = jsonObject.get("mode").getAsString();
                     lobby = false;
                 } catch (Exception e) {     // this means we are in a lobby
                     try {
-                        gameType = jsonObject.get("gametype").toString();
+                        gameType = jsonObject.get("gametype").getAsString();
                         lobby = true;
                         if (GUIConfig.debugMode) {
                             QuickStats.LOGGER.info("detected this as a lobby");

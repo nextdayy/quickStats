@@ -110,11 +110,19 @@ public class GUIConfig extends Vigilant {
             category = "General", subcategory = "Updates"
     )
     public static boolean sendUp = true;
+    @Property(
+            type = PropertyType.SELECTOR,
+            name = "Security Level",
+            description = "Level of warning to issue if a mismatched hash is detected on startup, which could suggest modification of the mod and lead to possible data theft.",
+            category = "General", subcategory = "Updates",
+            options = {"Off", "Warn in Logger", "Warn on world join", "Halt startup"}
+    )
+    public static int securityLevel = 1;
 
 
     @Property(
             type = PropertyType.SWITCH, name = "Debug",
-            description = "Enable/disable verbose logging to help with diagnostics.",
+            description = "Enable/disable verbose logging to help with diagnostics.\n\u00A7eNote: You will see a lot of (useless) errors in logs with this active!",
             category = "Support", subcategory = "General"
     )
     public static boolean debugMode = false;
@@ -312,6 +320,13 @@ public class GUIConfig extends Vigilant {
             options = {"Default (Blue)", "Essential (Green)", "Gamer (Red)", "Pinkulu (Pink)", "Clean (Transparent)", "White"}
     )
     public static int colorPreset = 0;
+    @Property(
+            type = PropertyType.SELECTOR, name = "Animation",
+            description = "Type of window animation to use when drawing the GUI.",
+            category = "Gui Settings", subcategory = "Presets",
+            options = {"Classic", "Slide Left", "Slide Right", "Full Expand"}
+    )
+    public static int animationPreset = 0;
     @Property(
             type = PropertyType.SLIDER, name = "Window Framerate",
             description = "Frame multiplier when rendering. Higher numbers mean slower animations.\n\u00A7eMay cause window to look jittery on high numbers!",

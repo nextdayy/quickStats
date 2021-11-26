@@ -8,7 +8,7 @@ import java.util.Properties;
 public class UpdateChecker {
     public static String latestVersion;
 
-    public static boolean updateNeeded(String currentVersion) {
+    public static boolean checkUpdate(String currentVersion) {
         try {
             Properties prop = new Properties();
             prop.load(new URL(

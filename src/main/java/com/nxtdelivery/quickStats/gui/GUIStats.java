@@ -21,7 +21,7 @@ public class GUIStats extends Gui {
     private static final Minecraft mc = Minecraft.getMinecraft();
     FontRenderer fr = mc.fontRendererObj;
     long systemTime = Minecraft.getSystemTime();
-    Integer height, width, top, bottom, middle, halfWidth, seed, pad, padY, scaledX, scaledY, midX, midY, frame, progFrame;
+    Integer height, width, top, bottom, middle, halfWidth, fullWidth, pad, padY, scaledX, scaledY, midX, midY, frame, progFrame, currentWidth;
     long frames, framesLeft, fifth, upperThreshold, lowerThreshold;
     Color progColor, bgColor, textColor;
     Float fontScale, percentComplete;
@@ -55,6 +55,7 @@ public class GUIStats extends Gui {
         username = user;
         int xOffset;
         switch (GUIConfig.winPreset) {
+            default:
             case 0:
                 xOffset = 40;
                 top = 50;
@@ -75,17 +76,12 @@ public class GUIStats extends Gui {
                 top = 450;
                 bottom = 515;
                 break;
-            default:        // no null pointer exceptions for me
-                xOffset = 40;
-                top = 50;
-                bottom = 116;
-                break;
         }
         if (!GUIConfig.sizeEnabled) {
             middle = midX + (scaledX * xOffset);
             fontScale = 0.8f;
             halfWidth = 82;
-            seed = (halfWidth * 2);
+            fullWidth = (halfWidth * 2);
             pad = roundIntWithFloat(middle, 1.25f) - halfWidth - 10;
             padY = roundIntWithFloat(top, 1.25f) + 26;
             switch (guiScale) {
@@ -119,14 +115,14 @@ public class GUIStats extends Gui {
                 this.textColor = new Color(255, 164, 182, 255);
                 break;
             case 4:         // transparent
-                this.bgColor = new Color(50,50,50,30);
-                this.progColor = new Color(43,43,43,40);
-                this.textColor = new Color(255,255,255,220);
+                this.bgColor = new Color(50, 50, 50, 30);
+                this.progColor = new Color(43, 43, 43, 40);
+                this.textColor = new Color(255, 255, 255, 220);
                 break;
             case 5:         // white theme
-                this.progColor = new Color(0,0,0,110);
-                this.bgColor = new Color(255,255,255,73);
-                this.textColor = new Color(241,241,241,255);
+                this.progColor = new Color(0, 0, 0, 110);
+                this.bgColor = new Color(255, 255, 255, 73);
+                this.textColor = new Color(241, 241, 241, 255);
                 break;
             default:
                 this.progColor = GUIConfig.progColor;
@@ -164,17 +160,20 @@ public class GUIStats extends Gui {
     /**
      * This math function was taken from PopupEvents by Sk1er LLC under GNU General License.
      * This code is used to add smooth animations to the window.
+     *
      * @param number that needs to be clamped into range of 0 to 1
      * @return clamped number
      */
     private static float clamp(float number) {
         return number < (float) 0.0 ? (float) 0.0 : Math.min(number, (float) 1.0);
     }
+
     /**
      * This math function was taken from PopupEvents by Sk1er LLC under GNU General License.
      * This code is used to add smooth animations to the window.
+     *
      * @param current the current number in question
-     * @param goal the target number
+     * @param goal    the target number
      * @return integer number
      */
     private static float easeOut(float current, float goal) {
@@ -187,7 +186,8 @@ public class GUIStats extends Gui {
 
     /**
      * Multiply an Integer with a float value, then round it back to an Integer
-     * @param number the Integer that needs to be multiplied
+     *
+     * @param number     the Integer that needs to be multiplied
      * @param multiplier the Float that will multiply the Integer
      * @return the value multiplied then rounded back to an Integer.
      */
@@ -201,23 +201,6 @@ public class GUIStats extends Gui {
         if (framesLeft <= 0) {
             return;
         }
-
-        while (systemTime < Minecraft.getSystemTime() + (1000 / 60)) {
-            if(progFrame == GUIConfig.framesToSkipP) {
-                framesLeft--;
-                progFrame = -1;
-            }
-            progFrame++;
-            systemTime += (1000 / 60);
-        }
-        if(frame == GUIConfig.framesToSkip) {
-            frame = 0;
-            percentComplete = clamp(easeOut(percentComplete,
-                    framesLeft < lowerThreshold ? 0.0f : framesLeft > upperThreshold ? 1.0f : framesLeft));
-        } else {
-            frame++;
-        }
-
         if (GUIConfig.sizeEnabled) {
             middle = width - GUIConfig.winMiddle;
             top = GUIConfig.winTop;
@@ -226,7 +209,7 @@ public class GUIStats extends Gui {
             fontScale = 0.8f;
             pad = roundIntWithFloat(middle, 1.25f) - halfWidth;
             padY = roundIntWithFloat(top, 1.25f) + 26;
-            seed = halfWidth * 2;
+            fullWidth = halfWidth * 2;
             this.bgColor = GUIConfig.bgColor;
             this.textColor = GUIConfig.textColor;
             this.progColor = GUIConfig.progColor;
@@ -238,8 +221,45 @@ public class GUIStats extends Gui {
         }
 
 
-        int currentWidth = (int) (halfWidth * percentComplete);
-        Gui.drawRect(middle - currentWidth, top, middle + currentWidth, bottom, this.bgColor.getRGB());
+        while (systemTime < Minecraft.getSystemTime() + (1000 / 60)) {
+            if (progFrame == GUIConfig.framesToSkipP) {
+                framesLeft--;
+                progFrame = -1;
+            }
+            progFrame++;
+            systemTime += (1000 / 60);
+        }
+        if (frame == GUIConfig.framesToSkip) {
+            frame = 0;
+            percentComplete = clamp(easeOut(percentComplete,
+                    framesLeft < lowerThreshold ? 0.0f : framesLeft > upperThreshold ? 1.0f : framesLeft));
+        } else {
+            frame++;
+        }
+        switch (GUIConfig.animationPreset) {
+            default:
+            case 0:
+                currentWidth = (int) (halfWidth * percentComplete);
+                Gui.drawRect(middle - currentWidth, top, middle + currentWidth, bottom, this.bgColor.getRGB());
+                break;
+            case 1:
+                int rightSide = middle + halfWidth;
+                currentWidth = (int) (rightSide - fullWidth * percentComplete);
+                Gui.drawRect(currentWidth, top, rightSide, bottom, this.bgColor.getRGB());
+                break;
+            case 2:
+                int leftSide = middle - halfWidth;
+                currentWidth = (int) (leftSide + fullWidth * percentComplete);
+                Gui.drawRect(leftSide, top, currentWidth, bottom, this.bgColor.getRGB());
+                break;
+            case 3:
+                currentWidth = (int) (halfWidth * percentComplete);
+                int currentTop = (int) (top * percentComplete);
+                int currentBottom = (int) (bottom * percentComplete);
+                Gui.drawRect(middle - currentWidth, currentTop, middle + currentWidth, currentBottom, this.bgColor.getRGB());
+                break;
+
+        }
 
         if (percentComplete == 1.0F) {
             if (GUIConfig.test) {
@@ -248,7 +268,7 @@ public class GUIStats extends Gui {
             long length = upperThreshold - lowerThreshold;
             long current = framesLeft - lowerThreshold;
             float progress = 1F - clamp((float) current / (float) length);
-            Gui.drawRect(middle - currentWidth, bottom - 2, (int) (middle - currentWidth + (seed * progress)), bottom,
+            Gui.drawRect(middle - halfWidth, bottom - 2, (int) (middle - halfWidth + (fullWidth * progress)), bottom,
                     this.progColor.getRGB()); // 128, 226, 126
             if (guiScale == 0) {
                 GL11.glPushMatrix();
@@ -270,6 +290,9 @@ public class GUIStats extends Gui {
             }
             if (api.timeOut) {
                 title = "Request timed out!";
+            }
+            if (api.slowDown) {
+                title = "You're requesting too fast!";
             }
 
             try {
