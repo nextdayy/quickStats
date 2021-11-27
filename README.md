@@ -2,7 +2,7 @@
 QuickStats is a easy to use, Hypixel utility mod to show stats of nearby players! Simply press a key of your choice while looking at a player for a simple, easy to understand GUI popup on their stats. With automatic game detection, it works for whatever Hypixel game you happen to be playing! Its quick, lag free activation allows for it to be used in any scenario, including PvP, making it the perfect companion for any Minecraft player.
 
 # _Mod Showcase_
-With just the press of a key, or a quick command, you can get detailed and informative stats on that player, no matter the game!
+With just the press of a key, you can get detailed and informative stats on that player, no matter the game!
 ![mod-showcase-qsts](https://user-images.githubusercontent.com/79922345/138262477-c65ee786-8873-4383-875e-97566e85acf6.gif)
 
 
