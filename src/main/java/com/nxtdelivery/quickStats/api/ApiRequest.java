@@ -146,7 +146,7 @@ public class ApiRequest extends Thread {
                     mc.thePlayer.addChatMessage(new ChatComponentText(Reference.COLOR
                             + "[QuickStats] failed to contact the Hypixel API. Request timed out!"));
                     timeOut = true;
-                } else if (e.getMessage().contains("429 for URL")){
+                } else if (e.getMessage().contains("429 for URL")) {
                     mc.thePlayer.addChatMessage(new ChatComponentText(Reference.COLOR
                             + "[QuickStats] the Hypixel API didn't respond as you are sending requests too fast! Slow down!"));
                     slowDown = true;
@@ -174,6 +174,7 @@ public class ApiRequest extends Thread {
 
     /**
      * Build a JSON Object from the given URL.
+     *
      * @param url (as a String)
      * @return com.google.gson.JsonObject
      * @throws IOException if URL is incorrect/doesn't respond.

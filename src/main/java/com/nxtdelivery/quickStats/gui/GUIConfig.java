@@ -159,7 +159,9 @@ public class GUIConfig extends Vigilant {
                 s.println(getMessage());
             }
         }, "Cleaning Configuration file");
-        new TickDelay(() -> {throw new ReportedException(report);},0);
+        new TickDelay(() -> {
+            throw new ReportedException(report);
+        }, 0);
     }
 
 
@@ -211,7 +213,7 @@ public class GUIConfig extends Vigilant {
         }
         bgColor = new Color(27, 27, 27, 200);
         progColor = new Color(22, 33, 245, 140);
-        textColor = new Color(255,255,255,255);
+        textColor = new Color(255, 255, 255, 255);
     }
 
     @Property(
@@ -272,7 +274,6 @@ public class GUIConfig extends Vigilant {
             min = 1, max = 255
     )
     public static Color textColor = new Color(255, 255, 255, 255);
-
 
 
     @Property(
@@ -341,8 +342,6 @@ public class GUIConfig extends Vigilant {
             max = 5
     )
     public static int framesToSkipP = 0;
-
-
 
 
     @Property(

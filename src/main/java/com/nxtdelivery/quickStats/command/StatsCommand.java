@@ -9,10 +9,8 @@ import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.crash.CrashReport;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ReportedException;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -73,7 +71,7 @@ public class StatsCommand implements ICommand {
                     QuickStats.sendMessages("Reloading!");
                     GUIConfig.INSTANCE.initialize();
                     QuickStats.updateCheck = UpdateChecker.checkUpdate(Reference.VERSION);
-                    AuthChecker.checkAuth(QuickStats.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+                    AuthChecker.checkAuth(QuickStats.JarFile.getPath());
                     QuickStats.sendMessages("Reloaded! Re-log and check logs for more information.");
                     Minecraft.getMinecraft().thePlayer.playSound("minecraft:random.successful_hit", 1.0F, 1.0F);
                     break;
@@ -101,7 +99,7 @@ public class StatsCommand implements ICommand {
                     }
                     break;
                 default:
-                    if(args[0].equals("me")) {
+                    if (args[0].equals("me")) {
                         QuickStats.GuiInst.showGUI(mc.thePlayer.getName());
                     } else {
                         QuickStats.GuiInst.showGUI(args[0]);
@@ -142,7 +140,6 @@ public class StatsCommand implements ICommand {
                     break;
             }
         } catch (Exception e) {
-            if (e instanceof SecurityException) throw new ReportedException(new CrashReport("Mismatch in mod hash", new SecurityException("Mismatch in mod hash")));
             sender.addChatMessage(new ChatComponentText(Reference.COLOR
                     + "[QuickStats] Command menu (mod version " + Reference.VERSION + ")"));
             sender.addChatMessage(new ChatComponentText(Reference.COLOR
@@ -164,7 +161,7 @@ public class StatsCommand implements ICommand {
                 list.add(info.getGameProfile().getName());
             }
 
-            if(args.length == 1) return getListOfStringsMatchingLastWord(args, list.toArray(new String[0]));
+            if (args.length == 1) return getListOfStringsMatchingLastWord(args, list.toArray(new String[0]));
             else return null;
         } catch (Exception e) {
             if (GUIConfig.debugMode) {

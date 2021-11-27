@@ -1,15 +1,5 @@
-/* Changelog v@VER@
- *  fix the mod working (or rather not working) on other servers
- *  optimize the locraw utility
- *  optimize the party detection in hope of making it more efficient
- *  fix the auto game being off actually turning off
- *  stopped showing stats if player is NPC
- *  changed color of text to be easier to read
- *  added window speed modification
- *  fixed version checker sending messages
- *  rewrote stats to be null-protected
- *  added animations to the window
- *  added hash checker (beta)
+/* Changelog v1.6.3
+ *  fully added hash checker
  *  bug fixes
  *  code cleanup
  */
@@ -19,10 +9,7 @@ package com.nxtdelivery.quickStats;
 import com.nxtdelivery.quickStats.command.StatsCommand;
 import com.nxtdelivery.quickStats.gui.GUIConfig;
 import com.nxtdelivery.quickStats.gui.GUIStats;
-import com.nxtdelivery.quickStats.util.GetEntity;
-import com.nxtdelivery.quickStats.util.LocrawUtil;
-import com.nxtdelivery.quickStats.util.TickDelay;
-import com.nxtdelivery.quickStats.util.UpdateChecker;
+import com.nxtdelivery.quickStats.util.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -42,12 +29,15 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
+
+import java.io.File;
 
 @Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION)
 public class QuickStats {
@@ -57,6 +47,7 @@ public class QuickStats {
     private static final Minecraft mc = Minecraft.getMinecraft();
     private KeyBinding statsKey;
     public static final Logger LOGGER = LogManager.getLogger(Reference.NAME);
+    public static File JarFile;
     public static boolean updateCheck;
     public static boolean betaFlag = true;
     public static boolean locraw = false;
@@ -67,13 +58,12 @@ public class QuickStats {
     boolean set = false;
     String partySet;
 
-
     @EventHandler()
-    public void init(FMLInitializationEvent event) {
-        LOGGER.info("reading config...");
+    public void preInit(FMLPreInitializationEvent event) {
+        LOGGER.info("preloading config...");
         try {
             GUIConfig.INSTANCE.preload();
-            LOGGER.info("config read was successful");
+            LOGGER.info("config preload was successful");
         } catch (Exception e) {
             if (GUIConfig.debugMode) {
                 e.printStackTrace();
@@ -81,9 +71,17 @@ public class QuickStats {
             corrupt = true;
             LOGGER.error("Config failed to read. File has been reset. If you just reset your config, ignore this message.");
         }
-        LOGGER.info("attempting to check update status and authenticity of mod...");
+        JarFile = event.getSourceFile();
+        if (GUIConfig.debugMode) {
+            LOGGER.info("Got JAR File: " + JarFile.getPath());
+        }
+    }
+
+    @EventHandler()
+    public void init(FMLInitializationEvent event) {
+        LOGGER.info("attempting to check update status and mod authenticity...");
         updateCheck = UpdateChecker.checkUpdate(Reference.VERSION);
-        //AuthChecker.checkAuth(JarName);  // TODO
+        AuthChecker.checkAuth(JarFile.getPath());
         LOGGER.info("registering settings...");
         statsKey = new KeyBinding("Get Stats", GUIConfig.key, "QuickStats");
         ClientRegistry.registerKeyBinding(statsKey);
@@ -113,7 +111,7 @@ public class QuickStats {
                             if (entity.getName() == null || entity.getName().equals("")) {
                                 return;
                             }
-                            if(onHypixel) {
+                            if (onHypixel) {
                                 if (entity.getDisplayName().getUnformattedText().startsWith("\u00A78[NPC]") || !entity.getDisplayName().getUnformattedText().startsWith("\u00A7")) {      // npc test
                                     return;
                                 }
@@ -129,14 +127,12 @@ public class QuickStats {
 
     @SubscribeEvent
     public void onChatReceive(ClientChatReceivedEvent event) {
-        // System.out.println(event.message.getUnformattedText());
         if (onHypixel) {
             if (GUIConfig.autoGetAPI) {
                 try {
                     if (event.message.getUnformattedText().contains("Your new API key is")) {
                         String apiMessage = event.message.getUnformattedText();
                         String apiKey = apiMessage.substring(20);
-                        //System.out.println(apiKey);
                         LOGGER.info("got API key from message: " + apiKey + ". writing and reloading config...");
                         GUIConfig.apiKey = apiKey;
                         GUIConfig.INSTANCE.markDirty();
@@ -263,9 +259,7 @@ public class QuickStats {
                 betaFlag = false;
             } catch (Exception e) {
                 betaFlag = true;
-                if (GUIConfig.debugMode) {
-                    e.printStackTrace();
-                }
+                //if (GUIConfig.debugMode) { e.printStackTrace(); }
                 LOGGER.error("skipping beta message, bad world return!");
             }
         }
@@ -276,10 +270,19 @@ public class QuickStats {
                         "If you just reset your configuration file, ignore this message."), 20);
                 corrupt = false;
             } catch (Exception e) {
-                if (GUIConfig.debugMode) {
-                    e.printStackTrace();
-                }
+                //if (GUIConfig.debugMode) { e.printStackTrace(); }
                 LOGGER.error("skipping corrupt message, bad world return!");
+            }
+        }
+        if (AuthChecker.mismatch && GUIConfig.securityLevel == 2) {
+            try {
+                new TickDelay(() -> sendMessages("The hash for the mod is incorrect. Check the logs for more info.",
+                        "WARNING: This could mean your data is exposed to hackers! Make sure you got the mod from the OFFICIAL mirror, and try again.",
+                        Reference.URL), 20);
+                AuthChecker.mismatch = false;
+            } catch (Exception e) {
+                //if (GUIConfig.debugMode) { e.printStackTrace();}
+                LOGGER.error("skipping hash mismatch message, bad world return!");
             }
         }
     }
@@ -292,9 +295,7 @@ public class QuickStats {
             }
         } catch (Exception e) {
             LOGGER.error("Didn't send message: " + e.getMessage());
-            if (GUIConfig.debugMode) {
-                e.printStackTrace();
-            }
+            //if (GUIConfig.debugMode) { e.printStackTrace(); }
             if (Reference.VERSION.contains("beta")) {
                 betaFlag = true;
             }
@@ -319,9 +320,7 @@ public class QuickStats {
             mc.thePlayer.addChatMessage(new ChatComponentText(
                     Reference.COLOR + "--------------------------------------"));
         } catch (NullPointerException e) {
-            if (GUIConfig.debugMode) {
-                e.printStackTrace();
-            }
+            //if (GUIConfig.debugMode) { e.printStackTrace(); }
             updateCheck = true;
             LOGGER.error("skipping update message, bad world return!");
         }

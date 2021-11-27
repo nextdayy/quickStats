@@ -21,7 +21,7 @@ public class GUIStats extends Gui {
     private static final Minecraft mc = Minecraft.getMinecraft();
     FontRenderer fr = mc.fontRendererObj;
     long systemTime = Minecraft.getSystemTime();
-    Integer height, width, top, bottom, middle, halfWidth, fullWidth, pad, padY, scaledX, scaledY, midX, midY, frame, progFrame, currentWidth;
+    Integer height, width, top, bottom, middle, halfWidth, fullWidth, pad, padY, scaledX, scaledY, midX, midY, frame, progFrame, currentWidth, fullHeight;
     long frames, framesLeft, fifth, upperThreshold, lowerThreshold;
     Color progColor, bgColor, textColor;
     Float fontScale, percentComplete;
@@ -82,6 +82,7 @@ public class GUIStats extends Gui {
             fontScale = 0.8f;
             halfWidth = 82;
             fullWidth = (halfWidth * 2);
+            fullHeight = bottom - top;
             pad = roundIntWithFloat(middle, 1.25f) - halfWidth - 10;
             padY = roundIntWithFloat(top, 1.25f) + 26;
             switch (guiScale) {
@@ -210,6 +211,7 @@ public class GUIStats extends Gui {
             pad = roundIntWithFloat(middle, 1.25f) - halfWidth;
             padY = roundIntWithFloat(top, 1.25f) + 26;
             fullWidth = halfWidth * 2;
+            fullHeight = bottom - top;
             this.bgColor = GUIConfig.bgColor;
             this.textColor = GUIConfig.textColor;
             this.progColor = GUIConfig.progColor;
